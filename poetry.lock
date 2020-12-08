@@ -1,0 +1,43 @@
+[[package]]
+category = "main"
+description = "ANTLR 4.9 runtime for Python 3.7"
+name = "antlr4-python3-runtime"
+optional = false
+python-versions = "*"
+version = "4.9"
+
+[[package]]
+category = "main"
+description = "Python Lex & Yacc"
+name = "ply"
+optional = false
+python-versions = "*"
+version = "3.11"
+
+[[package]]
+category = "main"
+description = "SLY - Sly Lex Yacc"
+name = "sly"
+optional = false
+python-versions = "*"
+version = "0.4"
+
+[package.extras]
+test = ["pytest", "regex"]
+
+[metadata]
+content-hash = "42de93dfb1a9de55a048d74f6005d1521094283c83f2f024c74fb163c8d8e3bb"
+lock-version = "1.0"
+python-versions = "^3.8"
+
+[metadata.files]
+antlr4-python3-runtime = [
+    {file = "antlr4-python3-runtime-4.9.tar.gz", hash = "sha256:02d9afb720c13c52b336234286966cdf5aff704f230a513e635adb0d94de97ae"},
+]
+ply = [
+    {file = "ply-3.11-py2.py3-none-any.whl", hash = "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce"},
+    {file = "ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
+]
+sly = [
+    {file = "sly-0.4.tar.gz", hash = "sha256:e5f2266a231322cc17519fbc3a3ba1c6335fed5a9a55abe0e598a35aea0ac32a"},
+]
