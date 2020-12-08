@@ -6,12 +6,16 @@
 letters [a-z A-Z]+
 number [0-9]+
 op     [-|+|*|/|^|=]
+openPar [(]
+closePar [)]
 
 %%
 
-{letters} {printf("letters ");}
-{number}  {printf("number ");}
-{op}      {printf("operator ");}
+{letters} {printf("LETTERS ");}
+{number}  {printf("NUMS ");}
+{op}      {printf("OP ");}
+{openPar}   {printf("OPEN ");}
+{closePar}  {printf("CLOSE ");}
 
 %%
 int yywrap(void){} 
