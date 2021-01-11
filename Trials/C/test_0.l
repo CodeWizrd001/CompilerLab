@@ -6,17 +6,22 @@
 	int flag = 0 ;
 %}
 
-letters [a-zA-Z]+
-number [0-9]+
-op     [-|+|*|/|^|=]
-openPar [(]
-closePar [)]
-space [ ]+
+lower 		[a-z]+
+upper 		[A-Z]+
+number		[0-9]+
+op     		[-|+|*|/|^|=]
+openPar 	[(]
+closePar 	[)]
+space 		[ ]+
 
 %%
-
-{letters} 	{printf("LETTERS [%s] ",yytext);}
+{lower} 	{printf("LOWER [%s] ",yytext);}
+{upper} 	{printf("UPPER [%s] ",yytext);}
 {number}  	{printf("NUMS [%s] ",yytext);}
+
+({lower}|{upper})({lower}|{upper}|{number})*({lower}|{upper}|{number}) {printf("VARIABLE [%s] ",yytext);}
+
+
 {op}      	{printf("OP [%s] ",yytext);}
 {openPar}   {printf("OPEN ");}
 {closePar}  {printf("CLOSE ");}
@@ -30,6 +35,7 @@ int yywrap(void)
 
 int main(int argc, char* argv[])
 {
+	printf("[+]  Started\n") ;
 	if(argc > 1)
 	{
 		FILE *f1 = fopen(argv[1], "r");

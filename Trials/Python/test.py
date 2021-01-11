@@ -7,10 +7,11 @@ class SLexer(Lexer) :
         OP,
         OPEN,
         CLOSE,
+        SPACE,
     }
 
-    LETTERS = r'[a-z A-Z]+'
-    NUMS = r'[0-9 ]+'
+    LETTERS = r'[a-zA-Z]+'
+    NUMS = r'[0-9]+'
     OP = r'[+|-|*|/|%|=]'
     
     OPEN = r'[(]'
