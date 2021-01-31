@@ -19,7 +19,7 @@ space 		[ ]+
 {upper} 	{printf("UPPER [%s] ",yytext);}
 {number}  	{printf("NUMS [%s] ",yytext);}
 
-({lower}|{upper})({lower}|{upper}|{number})*({lower}|{upper}|{number}) {printf("VARIABLE [%s] ",yytext);}
+({lower}|{upper})({lower}|{upper}|{number})* {printf("VARIABLE [%s] ",yytext);}
 
 
 {op}      	{printf("OP [%s] ",yytext);}
