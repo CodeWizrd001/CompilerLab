@@ -3,6 +3,7 @@ from sly import Lexer
 class SLexer(Lexer) :
     tokens = {
         LETTERS,
+        SPECS,
         NUMS,
         OP,
         OPEN,
@@ -11,6 +12,7 @@ class SLexer(Lexer) :
     }
 
     LETTERS = r'[a-zA-Z]+'
+    SPECS = r'[\'|\"]+'
     NUMS = r'[0-9]+'
     OP = r'[+|-|*|/|%|=]'
     
