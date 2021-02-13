@@ -1,7 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-
+    
     #include "custom.h"
 
     void paren(tnode *Tree) ;
@@ -114,7 +114,6 @@ int main(int argc,char **argv)
     REG[i] = 0 ;
 
   fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-
   yyparse();
   return 1;
 }
