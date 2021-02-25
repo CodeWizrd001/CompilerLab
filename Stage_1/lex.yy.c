@@ -441,8 +441,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "1.l"
-#line 2 "1.l"
+#line 1 "e_2.l"
+#line 2 "e_2.l"
     #include <stdio.h>
     #include "custom.h" 
 	  #include "y.tab.h"
@@ -664,7 +664,7 @@ YY_DECL
 		}
 
 	{
-#line 7 "1.l"
+#line 7 "e_2.l"
 
 #line 670 "lex.yy.c"
 
@@ -725,7 +725,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 8 "1.l"
+#line 8 "e_2.l"
 {
           yylval = (YYSTYPE) calloc(1,sizeof(tnode)) ;
           yylval->val = atoi(yytext) ;
@@ -737,7 +737,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 16 "1.l"
+#line 16 "e_2.l"
 {
           yylval = (YYSTYPE) calloc(1,sizeof(tnode)) ;
           yylval->val = 0 ;
@@ -749,7 +749,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 24 "1.l"
+#line 24 "e_2.l"
 {
           yylval = (YYSTYPE) calloc(1,sizeof(tnode)) ;
           yylval->val = 0 ;
@@ -761,23 +761,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 32 "1.l"
+#line 32 "e_2.l"
 return *yytext;
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 33 "1.l"
+#line 33 "e_2.l"
 return NEWLINE;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "1.l"
+#line 34 "e_2.l"
 return *yytext;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 36 "1.l"
+#line 36 "e_2.l"
 ECHO;
 	YY_BREAK
 #line 784 "lex.yy.c"
@@ -1785,7 +1785,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 36 "1.l"
+#line 36 "e_2.l"
 
 
 yywrap()
