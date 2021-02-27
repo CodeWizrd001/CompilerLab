@@ -125,9 +125,9 @@ int codeGen(tnode *Tree)
   {
     int p = codeGen(Tree->left) ;
     int q = codeGen(Tree->right) ;
-    int s = p < q ? p : q ; 
-    int b = p < q ? q : p ;
-    s = p ; b = q ;
+    int s = p ; 
+    int b = q ;
+    // s = p ; b = q ;
     switch(Tree->op)
     {
       case '+' :Tree->val = Tree->left->val + Tree->right->val ;

@@ -1,0 +1,397 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    ENDLINE
+    NUM
+
+Grammar
+
+Rule 0     S' -> pgm
+Rule 1     pgm -> BEGIN Slist END SEMI
+Rule 2     pgm -> BEGIN END SEMI
+Rule 3     Slist -> Slist Stmt
+Rule 4     Slist -> Stmt NEWLINE
+Rule 5     Slist -> Stmt
+Rule 6     Stmt -> Input
+Rule 7     Stmt -> Output
+Rule 8     Stmt -> Asgmt
+Rule 9     Input -> READ LPAREN ID RPAREN SEMI
+Rule 10    Output -> WRITE LPAREN E RPAREN SEMI
+Rule 11    Asgmt -> ID EQ E SEMI
+Rule 12    E -> E OP2 E
+Rule 13    E -> E OP E
+Rule 14    E -> ID
+
+Terminals, with rules where they appear
+
+BEGIN                : 1 2
+END                  : 1 2
+ENDLINE              : 
+EQ                   : 11
+ID                   : 9 11 14
+LPAREN               : 9 10
+NEWLINE              : 4
+NUM                  : 
+OP                   : 13
+OP2                  : 12
+READ                 : 9
+RPAREN               : 9 10
+SEMI                 : 1 2 9 10 11
+WRITE                : 10
+error                : 
+
+Nonterminals, with rules where they appear
+
+Asgmt                : 8
+E                    : 10 11 12 12 13 13
+Input                : 6
+Output               : 7
+Slist                : 1 3
+Stmt                 : 3 4 5
+pgm                  : 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . pgm
+    (1) pgm -> . BEGIN Slist END SEMI
+    (2) pgm -> . BEGIN END SEMI
+
+    BEGIN           shift and go to state 2
+
+    pgm                            shift and go to state 1
+
+state 1
+
+    (0) S' -> pgm .
+
+
+
+state 2
+
+    (1) pgm -> BEGIN . Slist END SEMI
+    (2) pgm -> BEGIN . END SEMI
+    (3) Slist -> . Slist Stmt
+    (4) Slist -> . Stmt NEWLINE
+    (5) Slist -> . Stmt
+    (6) Stmt -> . Input
+    (7) Stmt -> . Output
+    (8) Stmt -> . Asgmt
+    (9) Input -> . READ LPAREN ID RPAREN SEMI
+    (10) Output -> . WRITE LPAREN E RPAREN SEMI
+    (11) Asgmt -> . ID EQ E SEMI
+
+    END             shift and go to state 4
+    READ            shift and go to state 9
+    WRITE           shift and go to state 11
+    ID              shift and go to state 10
+
+    Slist                          shift and go to state 3
+    Stmt                           shift and go to state 5
+    Input                          shift and go to state 6
+    Output                         shift and go to state 7
+    Asgmt                          shift and go to state 8
+
+state 3
+
+    (1) pgm -> BEGIN Slist . END SEMI
+    (3) Slist -> Slist . Stmt
+    (6) Stmt -> . Input
+    (7) Stmt -> . Output
+    (8) Stmt -> . Asgmt
+    (9) Input -> . READ LPAREN ID RPAREN SEMI
+    (10) Output -> . WRITE LPAREN E RPAREN SEMI
+    (11) Asgmt -> . ID EQ E SEMI
+
+    END             shift and go to state 12
+    READ            shift and go to state 9
+    WRITE           shift and go to state 11
+    ID              shift and go to state 10
+
+    Stmt                           shift and go to state 13
+    Input                          shift and go to state 6
+    Output                         shift and go to state 7
+    Asgmt                          shift and go to state 8
+
+state 4
+
+    (2) pgm -> BEGIN END . SEMI
+
+    SEMI            shift and go to state 14
+
+
+state 5
+
+    (4) Slist -> Stmt . NEWLINE
+    (5) Slist -> Stmt .
+
+    NEWLINE         shift and go to state 15
+    END             reduce using rule 5 (Slist -> Stmt .)
+    READ            reduce using rule 5 (Slist -> Stmt .)
+    WRITE           reduce using rule 5 (Slist -> Stmt .)
+    ID              reduce using rule 5 (Slist -> Stmt .)
+
+
+state 6
+
+    (6) Stmt -> Input .
+
+    NEWLINE         reduce using rule 6 (Stmt -> Input .)
+    END             reduce using rule 6 (Stmt -> Input .)
+    READ            reduce using rule 6 (Stmt -> Input .)
+    WRITE           reduce using rule 6 (Stmt -> Input .)
+    ID              reduce using rule 6 (Stmt -> Input .)
+
+
+state 7
+
+    (7) Stmt -> Output .
+
+    NEWLINE         reduce using rule 7 (Stmt -> Output .)
+    END             reduce using rule 7 (Stmt -> Output .)
+    READ            reduce using rule 7 (Stmt -> Output .)
+    WRITE           reduce using rule 7 (Stmt -> Output .)
+    ID              reduce using rule 7 (Stmt -> Output .)
+
+
+state 8
+
+    (8) Stmt -> Asgmt .
+
+    NEWLINE         reduce using rule 8 (Stmt -> Asgmt .)
+    END             reduce using rule 8 (Stmt -> Asgmt .)
+    READ            reduce using rule 8 (Stmt -> Asgmt .)
+    WRITE           reduce using rule 8 (Stmt -> Asgmt .)
+    ID              reduce using rule 8 (Stmt -> Asgmt .)
+
+
+state 9
+
+    (9) Input -> READ . LPAREN ID RPAREN SEMI
+
+    LPAREN          shift and go to state 16
+
+
+state 10
+
+    (11) Asgmt -> ID . EQ E SEMI
+
+    EQ              shift and go to state 17
+
+
+state 11
+
+    (10) Output -> WRITE . LPAREN E RPAREN SEMI
+
+    LPAREN          shift and go to state 18
+
+
+state 12
+
+    (1) pgm -> BEGIN Slist END . SEMI
+
+    SEMI            shift and go to state 19
+
+
+state 13
+
+    (3) Slist -> Slist Stmt .
+
+    END             reduce using rule 3 (Slist -> Slist Stmt .)
+    READ            reduce using rule 3 (Slist -> Slist Stmt .)
+    WRITE           reduce using rule 3 (Slist -> Slist Stmt .)
+    ID              reduce using rule 3 (Slist -> Slist Stmt .)
+
+
+state 14
+
+    (2) pgm -> BEGIN END SEMI .
+
+    $end            reduce using rule 2 (pgm -> BEGIN END SEMI .)
+
+
+state 15
+
+    (4) Slist -> Stmt NEWLINE .
+
+    END             reduce using rule 4 (Slist -> Stmt NEWLINE .)
+    READ            reduce using rule 4 (Slist -> Stmt NEWLINE .)
+    WRITE           reduce using rule 4 (Slist -> Stmt NEWLINE .)
+    ID              reduce using rule 4 (Slist -> Stmt NEWLINE .)
+
+
+state 16
+
+    (9) Input -> READ LPAREN . ID RPAREN SEMI
+
+    ID              shift and go to state 20
+
+
+state 17
+
+    (11) Asgmt -> ID EQ . E SEMI
+    (12) E -> . E OP2 E
+    (13) E -> . E OP E
+    (14) E -> . ID
+
+    ID              shift and go to state 21
+
+    E                              shift and go to state 22
+
+state 18
+
+    (10) Output -> WRITE LPAREN . E RPAREN SEMI
+    (12) E -> . E OP2 E
+    (13) E -> . E OP E
+    (14) E -> . ID
+
+    ID              shift and go to state 21
+
+    E                              shift and go to state 23
+
+state 19
+
+    (1) pgm -> BEGIN Slist END SEMI .
+
+    $end            reduce using rule 1 (pgm -> BEGIN Slist END SEMI .)
+
+
+state 20
+
+    (9) Input -> READ LPAREN ID . RPAREN SEMI
+
+    RPAREN          shift and go to state 24
+
+
+state 21
+
+    (14) E -> ID .
+
+    SEMI            reduce using rule 14 (E -> ID .)
+    OP2             reduce using rule 14 (E -> ID .)
+    OP              reduce using rule 14 (E -> ID .)
+    RPAREN          reduce using rule 14 (E -> ID .)
+
+
+state 22
+
+    (11) Asgmt -> ID EQ E . SEMI
+    (12) E -> E . OP2 E
+    (13) E -> E . OP E
+
+    SEMI            shift and go to state 25
+    OP2             shift and go to state 26
+    OP              shift and go to state 27
+
+
+state 23
+
+    (10) Output -> WRITE LPAREN E . RPAREN SEMI
+    (12) E -> E . OP2 E
+    (13) E -> E . OP E
+
+    RPAREN          shift and go to state 28
+    OP2             shift and go to state 26
+    OP              shift and go to state 27
+
+
+state 24
+
+    (9) Input -> READ LPAREN ID RPAREN . SEMI
+
+    SEMI            shift and go to state 29
+
+
+state 25
+
+    (11) Asgmt -> ID EQ E SEMI .
+
+    NEWLINE         reduce using rule 11 (Asgmt -> ID EQ E SEMI .)
+    END             reduce using rule 11 (Asgmt -> ID EQ E SEMI .)
+    READ            reduce using rule 11 (Asgmt -> ID EQ E SEMI .)
+    WRITE           reduce using rule 11 (Asgmt -> ID EQ E SEMI .)
+    ID              reduce using rule 11 (Asgmt -> ID EQ E SEMI .)
+
+
+state 26
+
+    (12) E -> E OP2 . E
+    (12) E -> . E OP2 E
+    (13) E -> . E OP E
+    (14) E -> . ID
+
+    ID              shift and go to state 21
+
+    E                              shift and go to state 30
+
+state 27
+
+    (13) E -> E OP . E
+    (12) E -> . E OP2 E
+    (13) E -> . E OP E
+    (14) E -> . ID
+
+    ID              shift and go to state 21
+
+    E                              shift and go to state 31
+
+state 28
+
+    (10) Output -> WRITE LPAREN E RPAREN . SEMI
+
+    SEMI            shift and go to state 32
+
+
+state 29
+
+    (9) Input -> READ LPAREN ID RPAREN SEMI .
+
+    NEWLINE         reduce using rule 9 (Input -> READ LPAREN ID RPAREN SEMI .)
+    END             reduce using rule 9 (Input -> READ LPAREN ID RPAREN SEMI .)
+    READ            reduce using rule 9 (Input -> READ LPAREN ID RPAREN SEMI .)
+    WRITE           reduce using rule 9 (Input -> READ LPAREN ID RPAREN SEMI .)
+    ID              reduce using rule 9 (Input -> READ LPAREN ID RPAREN SEMI .)
+
+
+state 30
+
+    (12) E -> E OP2 E .
+    (12) E -> E . OP2 E
+    (13) E -> E . OP E
+
+    SEMI            reduce using rule 12 (E -> E OP2 E .)
+    OP2             reduce using rule 12 (E -> E OP2 E .)
+    OP              reduce using rule 12 (E -> E OP2 E .)
+    RPAREN          reduce using rule 12 (E -> E OP2 E .)
+
+  ! OP2             [ shift and go to state 26 ]
+  ! OP              [ shift and go to state 27 ]
+
+
+state 31
+
+    (13) E -> E OP E .
+    (12) E -> E . OP2 E
+    (13) E -> E . OP E
+
+    SEMI            reduce using rule 13 (E -> E OP E .)
+    OP              reduce using rule 13 (E -> E OP E .)
+    RPAREN          reduce using rule 13 (E -> E OP E .)
+    OP2             shift and go to state 26
+
+  ! OP2             [ reduce using rule 13 (E -> E OP E .) ]
+  ! OP              [ shift and go to state 27 ]
+
+
+state 32
+
+    (10) Output -> WRITE LPAREN E RPAREN SEMI .
+
+    NEWLINE         reduce using rule 10 (Output -> WRITE LPAREN E RPAREN SEMI .)
+    END             reduce using rule 10 (Output -> WRITE LPAREN E RPAREN SEMI .)
+    READ            reduce using rule 10 (Output -> WRITE LPAREN E RPAREN SEMI .)
+    WRITE           reduce using rule 10 (Output -> WRITE LPAREN E RPAREN SEMI .)
+    ID              reduce using rule 10 (Output -> WRITE LPAREN E RPAREN SEMI .)
+
