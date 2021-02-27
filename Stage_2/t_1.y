@@ -26,9 +26,7 @@
 
 program : BEGIN_ Slist END_ ';'   {
                                     printf("Completed\n");
-                                    // paren($2) ;
-                                    codeGen($2) ;
-                                    fprintf(target_file,"INT 10\n") ;
+                                    paren($2) ;
                                     exit(0);
                                   }
         | BEGIN_ END_ ';'         {
@@ -97,89 +95,6 @@ void freeReg(int reg)
   REG[reg] = 0 ;
 }
 
-int codeGen(tnode *Tree) 
-{
-  int p,q,s,b ;
-  if(Tree==NULL)
-    return -1;
-  switch(Tree->nodeType)
-  {
-    case READ:  fprintf(target_file,"MOV R15,7\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"MOV R15,-2\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"MOV R15,%d\n",addr[*(Tree->left->varName)-'a']) ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"INT 6\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                return -1 ;
-                break ;
-    case WRITE: fprintf(target_file,"MOV R15,5\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"MOV R15,-1\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"MOV R15,R%d\n",codeGen(Tree->left)) ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"INT 7\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                return -1 ;
-                break ;
-    case NUM :  p = getReg() ;
-                fprintf(target_file,"MOV R%d, %d\n",p,Tree->val) ;
-                return p ;
-                break ;
-    case ID :   p = getReg() ;
-                fprintf(target_file,"MOV R%d, [%d]\n",p,addr[*(Tree->varName)-'a']) ;
-                return p ;
-                break ;
-    case OP2 :
-    case OP :   p = codeGen(Tree->left) ;
-                q = codeGen(Tree->right) ;
-                s = p ; 
-                b = q ;
-                // s = p ; b = q ;
-                printf("[OP [%d %d] %d %d %c] \n",s,b,Tree->left->val,Tree->right->val,Tree->op) ;
-                switch(Tree->op)
-                {
-                  case '+' :fprintf(target_file,"ADD R%d, R%d\n",s,b) ;
-                            break ;
-                  case '-' :fprintf(target_file,"SUB R%d, R%d\n",s,b) ;
-                            break ;
-                  case '*' :fprintf(target_file,"MUL R%d, R%d\n",s,b) ;
-                            break ;
-                  case '/' :fprintf(target_file,"DIV R%d, R%d\n",s,b) ;
-                            break ;
-                  default  :break ;
-                }
-                freeReg(b) ;
-                return s ;
-                break ;
-    case EQ :   q = codeGen(Tree->right) ;
-                printf("[%c %d] \n",Tree->right->op,q) ;
-                fprintf(target_file,"MOV [%d],R%d\n",addr[*(Tree->left->varName)-'a'],q)  ;
-                return -1 ;
-                break ;
-    case Connector: p = codeGen(Tree->left) ;
-                    q = codeGen(Tree->right) ; 
-                    return -1 ; 
-                    break ;
-    default :   break ;
-  }
-  return -1 ;
-}
-
 int main(int argc,char **argv)
 {
   if(argc==2)
@@ -192,8 +107,6 @@ int main(int argc,char **argv)
   for(int i=0;i<26;i+=1)
     addr[i] = 4096 + i ;
   
-  fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-  fprintf(target_file,"MOV SP,4122\nMOV BP,4122\n");
   yyparse();
   return 1;
 }
