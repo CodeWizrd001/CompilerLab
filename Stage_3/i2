@@ -1,0 +1,10 @@
+begin
+read(x) ;
+read(y) ;
+breakpoint ;
+while (x <= y) do 
+    write(x) ;
+    x = x + 1 ;
+    breakpoint ;
+endwhile ;
+end ;

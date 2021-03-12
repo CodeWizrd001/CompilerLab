@@ -1,0 +1,11 @@
+begin
+read(x) ;
+read(y) ;
+breakpoint ;
+if(x < y) then
+    write(x) ;
+else 
+    write(y) ;
+endif ;
+write(1000) ;
+end ;

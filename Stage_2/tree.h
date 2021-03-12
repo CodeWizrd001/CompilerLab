@@ -1,5 +1,5 @@
 
-tnode* createTree(int val,char op,int type,char* c,tnode *l,tnode *r)
+tnode* createTree(int val,int op,int type,char* c,tnode *l,tnode *r)
 {
   tnode *Temp = (YYSTYPE) calloc(1,sizeof(tnode)) ;
   Temp->val = val ;
