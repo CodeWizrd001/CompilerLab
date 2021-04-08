@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+yacc -d $1.y
+flex $1.l 
+gcc lex.yy.c y.tab.c -o $1

@@ -1,0 +1,39 @@
+begin 
+    decl
+        int n,i,j,dup ;
+        int arr[50] ;
+    enddecl ;
+    breakpoint ;
+    read(n);
+    breakpoint ;
+    i=0;
+    while(i<n) do
+        read(arr[i]);
+        i = i+1;
+    endwhile;
+    i=0;
+    while(i<n) do
+        write(arr[i]);
+        i = i+1;
+    endwhile;
+    i=0;
+    while(i<n) do
+        j = i ;
+        while(j<n) do
+            if(arr[i]>arr[j]) then
+                breakpoint ;
+                dup = arr[i];
+                arr[i] = arr[j];
+                arr[j] = dup;
+                breakpoint ;
+            endif;
+            j = j + 1;
+        endwhile;
+        i = i+1;
+    endwhile;
+    i=0;
+    while(i<n) do
+        write(arr[i]);
+        i = i+1;
+    endwhile;
+end ;

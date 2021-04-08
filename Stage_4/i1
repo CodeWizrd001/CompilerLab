@@ -1,0 +1,15 @@
+begin
+    decl 
+        int num ;
+        str name ;
+        int a[100] ;
+    enddecl ;
+    num = 30 ;
+    a[10] = 1 ;
+    read(a[num]) ;
+    read(name) ;
+    write(num) ;
+    write(name) ;
+    write(a[num]) ;
+    write(a[11]) ;
+end ;
