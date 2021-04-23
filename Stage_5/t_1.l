@@ -29,13 +29,26 @@
 "=="        return EE ;
 "<="        return LTE ;
 ">="        return GTE ;
+"||"        return OR ;
+"&&"        return AND ;
 
-"enddecl"   return ENDDECL ;
-"decl"      return DECL ;
+"enddecl"   {
+              // printf("Lex Enddecl\n") ;
+              return ENDDECL ;
+            }
+"decl"      {
+              // printf("Lex Decl\n") ;
+              return DECL ;
+            }
 
-"int"       return INT ;
+"int"       {
+              // printf("Lex INT\n") ;
+              return INT ;
+            }
 "str"       return STR ;
 "bool"      return BOOL ;
+
+"main"      return MAIN ;
 
 "endif"     return ENDIF ;
 "if"        return IF ;
@@ -51,15 +64,18 @@
 "begin"     return BEGIN_ ;
 "breakpoint"  return BRKP ;
 "brkp"      return BRKP ;
+"return"    return RETURN ;
 ";"         return *yytext ;
-[()]        return *yytext;
+
+[(){},]        return *yytext;
+
 [ \t\n] 
 [0-9]+	    {
               yylval = createTree(atoi(yytext),-1,NUM,INT,NULL,NULL,NULL) ;
               // printf("NUM %d\n",atoi(yytext)) ;
               return NUM ;
             }
-[a-z0-9]+ 	{
+[a-zA-Z0-9]+ 	{
               char *name = (char *) calloc(strlen(yytext),sizeof(char)) ;
               strcpy(name,yytext) ;
               // printf("ID %s\n",yytext) ;
@@ -67,7 +83,7 @@
               return ID ;
             }
 .           {
-              printf("Other %c\n",*yytext) ;
+              // printf("Other %c\n",*yytext) ;
               return *yytext;
             }
 

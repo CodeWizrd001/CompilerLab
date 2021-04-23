@@ -1,19 +1,36 @@
-typedef struct tnode{
-    int val ;
-    int op ;
+typedef struct ParamStruct {
+    char *name ;
     int type ;
-    char *varName ;
-    int nodeType ;
-    struct tnode *left,*right ;
-} tnode;
+    struct ParamStruct *next ;
+} ParamStruct ;
 
 typedef struct GSymbol  {
     char *name ;
     int type ;
     int size ;
     int address ;
+    ParamStruct *paramList ;
+    int flabel ;
     struct GSymbol *next ;
 } GSymbol ;
+
+typedef struct LSymbol {
+    char *name ;
+    int type ;
+    int size ;
+    int address ;
+    struct LSymbol *next ;
+} LSymbol ;
+
+typedef struct tnode{
+    int val ;
+    int op ;
+    int type ;
+    char *varName ;
+    int nodeType ;
+    LSymbol *sTable ;
+    struct tnode *left,*right ;
+} tnode;
 
 #define YYSTYPE tnode*
 #define Connector -1

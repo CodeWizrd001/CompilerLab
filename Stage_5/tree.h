@@ -9,5 +9,6 @@ tnode* createTree(int val,int op,int type,int t,char* c,tnode *l,tnode *r)
   Temp->varName = c ;
   Temp->left = l ;
   Temp->right = r ;
+  Temp->sTable = NULL ;
   return Temp ;
 }

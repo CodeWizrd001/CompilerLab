@@ -19,6 +19,7 @@
 
     void assignType(tnode *Tree,int type) ;
     int getAddress(tnode *Node) ;
+    void showTable() ;
 
     FILE *target_file ;
     int REG[20] ;
@@ -47,6 +48,7 @@ program : BEGIN_ Slist END_ ';'   {
                                     // paren($2) ;
                                     fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
                                     fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096+varSize);
+                                    showTable() ;
                                     codeGen($2) ;
                                     fprintf(target_file,"INT 10\n") ;
                                     exit(0);
@@ -87,8 +89,6 @@ Declist : Declist Decl            {$$ = (YYSTYPE) createTree(0,-1,DECL,Connector
         ;
 Decl    : Type Varlist ';'        {
                                     assignType($2,$1->type) ;
-                                    $$ = (YYSTYPE) createTree(0,-1,DECL,DECL,NULL,$1,$2);
-                                    $$ = NULL ;
                                     addSymbols($2) ;
                                   }
         ;
@@ -233,6 +233,12 @@ int getAddress(tnode *Node)
       // else 
         return sTable[i].address ;
   return -1 ;
+}
+
+void showTable()
+{
+  for(int i=0;i<varEntry;i+=1)
+    printf("%10s %4d %4d %4d\n",sTable[i].name,sTable[i].type,sTable[i].address,sTable[i].size) ;
 }
 
 void addSymbol(tnode *Node)

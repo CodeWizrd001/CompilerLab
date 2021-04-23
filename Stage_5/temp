@@ -1,0 +1,10 @@
+LDeclBlock  : DECL LDeclList ENDDECL 
+            | DECL ENDDECL                              {printf("Empty Ldecl\n");}
+            ;
+
+LDeclList   : LDeclList LDecl                           {printf("LDeclList\n") ;}
+            | LDecl
+            ;
+
+LDecl       : Type Varlist ';'
+            ;

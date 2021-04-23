@@ -89,6 +89,7 @@
 
     void assignType(tnode *Tree,int type) ;
     int getAddress(tnode *Node) ;
+    void showTable() ;
 
     FILE *target_file ;
     int REG[20] ;
@@ -97,7 +98,7 @@
     GSymbol *sTable = NULL ;
     int label = 0 ;
 
-#line 101 "y.tab.c"
+#line 102 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -684,11 +685,11 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    45,    45,    54,    59,    63,    65,    69,    70,    72,
-      73,    74,    75,    76,    77,    78,    80,    83,    85,    86,
-      88,    95,    96,    97,    99,   103,   108,   115,   117,   121,
-     126,   131,   132,   134,   147,   160,   161,   162,   163,   164,
-     165,   166,   167,   168,   169,   171
+       0,    46,    46,    56,    61,    65,    67,    71,    72,    74,
+      75,    76,    77,    78,    79,    80,    82,    85,    87,    88,
+      90,    97,    98,    99,   101,   105,   110,   117,   119,   123,
+     128,   133,   134,   136,   149,   162,   163,   164,   165,   166,
+     167,   168,   169,   170,   171,   173
 };
 #endif
 
@@ -1354,237 +1355,238 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: BEGIN_ Slist END_ ';'  */
-#line 45 "t_1.y"
+#line 46 "t_1.y"
                                   {
                                     printf("Completed\n");
                                     // paren($2) ;
                                     fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
                                     fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096+varSize);
+                                    showTable() ;
                                     codeGen(yyvsp[-2]) ;
                                     fprintf(target_file,"INT 10\n") ;
                                     exit(0);
                                   }
-#line 1368 "y.tab.c"
+#line 1370 "y.tab.c"
     break;
 
   case 3: /* program: BEGIN_ END_ ';'  */
-#line 54 "t_1.y"
+#line 56 "t_1.y"
                                   {
                                     printf("NULL\n");
                                     exit(0);
                                   }
-#line 1377 "y.tab.c"
+#line 1379 "y.tab.c"
     break;
 
   case 4: /* IfStmt: IF '(' E ')' THEN Slist ELSE Slist ENDIF ';'  */
-#line 59 "t_1.y"
+#line 61 "t_1.y"
                                                         {
                                                           YYSTYPE Temp = (YYSTYPE) createTree(0,-1,IFTHEN,IFTHEN,NULL,yyvsp[-4],yyvsp[-2]);
                                                           yyval = (YYSTYPE) createTree(0,-1,IFTHEN,IF,NULL,yyvsp[-7],Temp) ;
                                                         }
-#line 1386 "y.tab.c"
+#line 1388 "y.tab.c"
     break;
 
   case 5: /* IfStmt: IF '(' E ')' THEN Slist ENDIF ';'  */
-#line 63 "t_1.y"
+#line 65 "t_1.y"
                                                         {yyval = (YYSTYPE) createTree(0,-1,IF,IF,NULL,yyvsp[-5],yyvsp[-2]);}
-#line 1392 "y.tab.c"
+#line 1394 "y.tab.c"
     break;
 
   case 6: /* WhStmt: WHILE '(' E ')' DO Slist ENDWHILE ';'  */
-#line 65 "t_1.y"
+#line 67 "t_1.y"
                                                   {
                                                     // printf("%d\n",$6->nodeType) ;
                                                     yyval = (YYSTYPE) createTree(0,-1,WHILE,WHILE,NULL,yyvsp[-5],yyvsp[-2]);}
-#line 1400 "y.tab.c"
+#line 1402 "y.tab.c"
     break;
 
   case 7: /* Slist: Slist Stmt  */
-#line 69 "t_1.y"
+#line 71 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,-1,Connector,Connector,NULL,yyvsp[-1],yyvsp[0]);}
-#line 1406 "y.tab.c"
+#line 1408 "y.tab.c"
     break;
 
   case 8: /* Slist: Stmt  */
-#line 70 "t_1.y"
+#line 72 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1412 "y.tab.c"
+#line 1414 "y.tab.c"
     break;
 
   case 9: /* Stmt: Input  */
-#line 72 "t_1.y"
+#line 74 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1418 "y.tab.c"
+#line 1420 "y.tab.c"
     break;
 
   case 10: /* Stmt: Output  */
-#line 73 "t_1.y"
+#line 75 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1424 "y.tab.c"
+#line 1426 "y.tab.c"
     break;
 
   case 11: /* Stmt: Asgmt  */
-#line 74 "t_1.y"
+#line 76 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1430 "y.tab.c"
+#line 1432 "y.tab.c"
     break;
 
   case 12: /* Stmt: IfStmt  */
-#line 75 "t_1.y"
+#line 77 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1436 "y.tab.c"
+#line 1438 "y.tab.c"
     break;
 
   case 13: /* Stmt: WhStmt  */
-#line 76 "t_1.y"
+#line 78 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1442 "y.tab.c"
+#line 1444 "y.tab.c"
     break;
 
   case 14: /* Stmt: BrkStmt  */
-#line 77 "t_1.y"
+#line 79 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1448 "y.tab.c"
+#line 1450 "y.tab.c"
     break;
 
   case 15: /* Stmt: Declarations  */
-#line 78 "t_1.y"
+#line 80 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1454 "y.tab.c"
+#line 1456 "y.tab.c"
     break;
 
   case 16: /* Declarations: DECL Declist ENDDECL ';'  */
-#line 80 "t_1.y"
+#line 82 "t_1.y"
                                         {
                                           yyval = (YYSTYPE) createTree(0,-1,DECL,DECL,NULL,yyvsp[-2],NULL);
                                         }
-#line 1462 "y.tab.c"
+#line 1464 "y.tab.c"
     break;
 
   case 17: /* Declarations: DECL ENDDECL ';'  */
-#line 83 "t_1.y"
+#line 85 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,DECL,0,NULL,NULL,NULL);}
-#line 1468 "y.tab.c"
+#line 1470 "y.tab.c"
     break;
 
   case 18: /* Declist: Declist Decl  */
-#line 85 "t_1.y"
+#line 87 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,DECL,Connector,NULL,yyvsp[-1],yyvsp[0]);}
-#line 1474 "y.tab.c"
+#line 1476 "y.tab.c"
     break;
 
   case 19: /* Declist: Decl  */
-#line 86 "t_1.y"
+#line 88 "t_1.y"
                                   {yyval = yyvsp[0] ;}
-#line 1480 "y.tab.c"
+#line 1482 "y.tab.c"
     break;
 
   case 20: /* Decl: Type Varlist ';'  */
-#line 88 "t_1.y"
+#line 90 "t_1.y"
                                   {
                                     assignType(yyvsp[-1],yyvsp[-2]->type) ;
                                     yyval = (YYSTYPE) createTree(0,-1,DECL,DECL,NULL,yyvsp[-2],yyvsp[-1]);
                                     yyval = NULL ;
                                     addSymbols(yyvsp[-1]) ;
                                   }
-#line 1491 "y.tab.c"
+#line 1493 "y.tab.c"
     break;
 
   case 21: /* Type: INT  */
-#line 95 "t_1.y"
+#line 97 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,TYPE,INT,NULL,NULL,NULL);}
-#line 1497 "y.tab.c"
+#line 1499 "y.tab.c"
     break;
 
   case 22: /* Type: STR  */
-#line 96 "t_1.y"
+#line 98 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,TYPE,STR,NULL,NULL,NULL);}
-#line 1503 "y.tab.c"
+#line 1505 "y.tab.c"
     break;
 
   case 23: /* Type: BOOL  */
-#line 97 "t_1.y"
+#line 99 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,TYPE,BOOL,NULL,NULL,NULL);}
-#line 1509 "y.tab.c"
+#line 1511 "y.tab.c"
     break;
 
   case 24: /* Varlist: Varlist ',' ID  */
-#line 99 "t_1.y"
+#line 101 "t_1.y"
                                   {
                                     yyvsp[0]->nodeType = IDDECL ;
                                     yyval = (YYSTYPE) createTree(0,-1,IDLIST,IDLIST,NULL,yyvsp[-2],yyvsp[0]);
                                   }
-#line 1518 "y.tab.c"
+#line 1520 "y.tab.c"
     break;
 
   case 25: /* Varlist: ID  */
-#line 103 "t_1.y"
+#line 105 "t_1.y"
                                   {
                                     yyvsp[0]->nodeType = IDDECL ;
                                     yyval = yyvsp[0] ;
                                     // printf("VAR %s %d\n",$$->varName,$$->type);
                                   }
-#line 1528 "y.tab.c"
+#line 1530 "y.tab.c"
     break;
 
   case 26: /* Varlist: ID '[' NUM ']'  */
-#line 108 "t_1.y"
+#line 110 "t_1.y"
                                   {
                                     yyvsp[-3]->nodeType = IDDECL ;
                                     yyvsp[-3]->type = ARRAY ;
                                     // $1->left = (YYSTYPE) createTree(0,-1,EXPR,EXPR,NULL,$3,NULL) ;
                                     yyvsp[-3]->left = yyvsp[-1] ;
                                   }
-#line 1539 "y.tab.c"
+#line 1541 "y.tab.c"
     break;
 
   case 27: /* BrkStmt: BRKP ';'  */
-#line 115 "t_1.y"
+#line 117 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,BRKP,BRKP,NULL,NULL,NULL);}
-#line 1545 "y.tab.c"
+#line 1547 "y.tab.c"
     break;
 
   case 28: /* Input: READ '(' ID ')' ';'  */
-#line 117 "t_1.y"
+#line 119 "t_1.y"
                                   {
                                     yyval = (YYSTYPE) createTree(0,-1,READ,INT,NULL,yyvsp[-2],NULL); 
                                     printf("[%#x %d] ",yyval,yyvsp[-2]->nodeType);
                                   }
-#line 1554 "y.tab.c"
+#line 1556 "y.tab.c"
     break;
 
   case 29: /* Input: READ '(' ArrEl ')' ';'  */
-#line 121 "t_1.y"
+#line 123 "t_1.y"
                                   {
                                     yyval = (YYSTYPE) createTree(0,-1,READ,INT,NULL,yyvsp[-2],NULL); 
                                     printf("[%#x %d] ",yyval,yyvsp[-2]->nodeType);
                                   }
-#line 1563 "y.tab.c"
+#line 1565 "y.tab.c"
     break;
 
   case 30: /* Output: WRITE '(' E ')' ';'  */
-#line 126 "t_1.y"
+#line 128 "t_1.y"
                                   {
                                     yyval = (YYSTYPE) createTree(0,-1,WRITE,INT,NULL,yyvsp[-2],NULL); 
                                     // printf("[%#x %d] ",$$,$3->nodeType);
                                   }
-#line 1572 "y.tab.c"
+#line 1574 "y.tab.c"
     break;
 
   case 31: /* Asgmt: ID EQ E ';'  */
-#line 131 "t_1.y"
+#line 133 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,'=',EQ,EQ,NULL,yyvsp[-3],yyvsp[-1]);}
-#line 1578 "y.tab.c"
+#line 1580 "y.tab.c"
     break;
 
   case 32: /* Asgmt: ArrEl EQ E ';'  */
-#line 132 "t_1.y"
+#line 134 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,'=',EQ,EQ,NULL,yyvsp[-3],yyvsp[-1]);}
-#line 1584 "y.tab.c"
+#line 1586 "y.tab.c"
     break;
 
   case 33: /* E: E OP2 E  */
-#line 134 "t_1.y"
+#line 136 "t_1.y"
                                     {
                                       if((yyvsp[-2]->type==INT||yyvsp[-2]->type==ID)&& yyvsp[0]->type==INT||yyvsp[0]->type==ID)
                                       {
@@ -1598,11 +1600,11 @@ yyreduce:
                                         exit(0) ;
                                       }
                                     }
-#line 1602 "y.tab.c"
+#line 1604 "y.tab.c"
     break;
 
   case 34: /* E: E OP E  */
-#line 147 "t_1.y"
+#line 149 "t_1.y"
                                     {
                                       if((yyvsp[-2]->type==INT||yyvsp[-2]->type==ID) && (yyvsp[0]->type==INT||yyvsp[0]->type==ID))
                                       {
@@ -1616,71 +1618,71 @@ yyreduce:
                                         exit(0) ;
                                       }
                                     }
-#line 1620 "y.tab.c"
+#line 1622 "y.tab.c"
     break;
 
   case 35: /* E: E LT E  */
-#line 160 "t_1.y"
+#line 162 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,LT,RELOP,BOOL,NULL,yyvsp[-2],yyvsp[0]);}
-#line 1626 "y.tab.c"
+#line 1628 "y.tab.c"
     break;
 
   case 36: /* E: E GT E  */
-#line 161 "t_1.y"
+#line 163 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,GT,RELOP,BOOL,NULL,yyvsp[-2],yyvsp[0]);}
-#line 1632 "y.tab.c"
+#line 1634 "y.tab.c"
     break;
 
   case 37: /* E: E EE E  */
-#line 162 "t_1.y"
+#line 164 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,EE,RELOP,BOOL,"==",yyvsp[-2],yyvsp[0]);}
-#line 1638 "y.tab.c"
+#line 1640 "y.tab.c"
     break;
 
   case 38: /* E: E NE E  */
-#line 163 "t_1.y"
+#line 165 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,NE,RELOP,BOOL,"!=",yyvsp[-2],yyvsp[0]);}
-#line 1644 "y.tab.c"
+#line 1646 "y.tab.c"
     break;
 
   case 39: /* E: E LTE E  */
-#line 164 "t_1.y"
+#line 166 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,LTE,RELOP,BOOL,"<=",yyvsp[-2],yyvsp[0]);}
-#line 1650 "y.tab.c"
+#line 1652 "y.tab.c"
     break;
 
   case 40: /* E: E GTE E  */
-#line 165 "t_1.y"
+#line 167 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,GTE,RELOP,BOOL,">=",yyvsp[-2],yyvsp[0]);}
-#line 1656 "y.tab.c"
+#line 1658 "y.tab.c"
     break;
 
   case 41: /* E: ID  */
-#line 166 "t_1.y"
+#line 168 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1662 "y.tab.c"
+#line 1664 "y.tab.c"
     break;
 
   case 42: /* E: NUM  */
-#line 167 "t_1.y"
+#line 169 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1668 "y.tab.c"
+#line 1670 "y.tab.c"
     break;
 
   case 43: /* E: STRING  */
-#line 168 "t_1.y"
+#line 170 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1674 "y.tab.c"
+#line 1676 "y.tab.c"
     break;
 
   case 44: /* E: ArrEl  */
-#line 169 "t_1.y"
+#line 171 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1680 "y.tab.c"
+#line 1682 "y.tab.c"
     break;
 
   case 45: /* ArrEl: ID '[' E ']'  */
-#line 171 "t_1.y"
+#line 173 "t_1.y"
                                     {
                                       yyval = yyvsp[-3]; 
                                       yyval->nodeType = ARRAY ;
@@ -1688,11 +1690,11 @@ yyreduce:
                                       // $$->left = (YYSTYPE) createTree(0,-1,EXPR,EXPR,NULL,$3,NULL) ;
                                       yyval->left = yyvsp[-1] ;
                                     }
-#line 1692 "y.tab.c"
+#line 1694 "y.tab.c"
     break;
 
 
-#line 1696 "y.tab.c"
+#line 1698 "y.tab.c"
 
       default: break;
     }
@@ -1886,7 +1888,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 182 "t_1.y"
+#line 184 "t_1.y"
 
 
 void yyerror(char const *s)
@@ -1941,6 +1943,12 @@ int getAddress(tnode *Node)
       // else 
         return sTable[i].address ;
   return -1 ;
+}
+
+void showTable()
+{
+  for(int i=0;i<varEntry;i+=1)
+    printf("%10s %4d %4d %4d\n",sTable[i].name,sTable[i].type,sTable[i].address,sTable[i].size) ;
 }
 
 void addSymbol(tnode *Node)
