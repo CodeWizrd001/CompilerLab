@@ -4,16 +4,6 @@ typedef struct ParamStruct {
     struct ParamStruct *next ;
 } ParamStruct ;
 
-typedef struct GSymbol  {
-    char *name ;
-    int type ;
-    int size ;
-    int address ;
-    ParamStruct *paramList ;
-    int flabel ;
-    struct GSymbol *next ;
-} GSymbol ;
-
 typedef struct LSymbol {
     char *name ;
     int type ;
@@ -21,6 +11,17 @@ typedef struct LSymbol {
     int address ;
     struct LSymbol *next ;
 } LSymbol ;
+
+typedef struct GSymbol  {
+    char *name ;
+    int type ;
+    int size ;
+    int address ;
+    ParamStruct *paramList ;
+    LSymbol *sTable ; 
+    int flabel ;
+    struct GSymbol *next ;
+} GSymbol ;
 
 typedef struct tnode{
     int val ;

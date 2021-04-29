@@ -14,7 +14,7 @@
               yylval = createTree(0,*yytext,OP2,INT,NULL,NULL,NULL) ;
               return OP2;
             }
-\"[a-zA-Z ]+\"  {
+\"[_a-zA-Z ]+\"  {
                   printf("String : %s\n",yytext) ;
                   char *str = (char *) calloc(strlen(yytext),sizeof(char)) ;
                   strcpy(str,yytext) ;
@@ -29,8 +29,15 @@
 "=="        return EE ;
 "<="        return LTE ;
 ">="        return GTE ;
+
 "||"        return OR ;
 "&&"        return AND ;
+
+"AND"       return AND ;
+"OR"        return OR ;
+
+"and"       return AND ;
+"or"        return OR ;
 
 "enddecl"   {
               // printf("Lex Enddecl\n") ;

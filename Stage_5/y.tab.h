@@ -96,8 +96,10 @@ extern int yydebug;
     PARAM = 297,                   /* PARAM  */
     FUNCTION = 298,                /* FUNCTION  */
     FDEF = 299,                    /* FDEF  */
-    AND = 300,                     /* AND  */
-    OR = 301                       /* OR  */
+    CALL = 300,                    /* CALL  */
+    ARGLIST = 301,                 /* ARGLIST  */
+    AND = 302,                     /* AND  */
+    OR = 303                       /* OR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -148,8 +150,10 @@ extern int yydebug;
 #define PARAM 297
 #define FUNCTION 298
 #define FDEF 299
-#define AND 300
-#define OR 301
+#define CALL 300
+#define ARGLIST 301
+#define AND 302
+#define OR 303
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

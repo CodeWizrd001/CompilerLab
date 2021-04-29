@@ -33,7 +33,7 @@ number      [0-9]+
 op          [-|+|*|/|^|=]
 openPar     [(]
 closePar    [)]
-space       [ ]+
+space       [ ]*
 eol         [\n|\0
 lineChars   [\"a-zA-Z0-9., \[\]\-]+
 labelChars  [_a-zA-Z0-9,]+
@@ -41,37 +41,37 @@ labelChars  [_a-zA-Z0-9,]+
 %%
 
 
-{labelChars}[:][\n]         {
+{labelChars}{space}[:][\n]         {
                                 if(!tr)
                                 {
                                     label += 1;
-                                    // printf("Len :%d\n",strlen(yytext)) ;
+                                    //printf("Len :%d\n",strlen(yytext)) ;
                                     yytext[strlen(yytext)-1] = '\0' ;
-                                    // printf("Len :%d\n",strlen(yytext)) ;
+                                    //printf("Len :%d\n",strlen(yytext)) ;
                                     yytext[strlen(yytext)-1] = '\0' ;
-                                    // printf("Len :%d\n",strlen(yytext)) ;
+                                    //printf("Len :%d\n",strlen(yytext)) ;
                                     addLabel(yytext,lines) ;
-                                    // printf("LABELDEC [%s %d %d]\n",yytext,label,labelTable[label-1].address) ;
+                                    //printf("LABELDEC [%s %d %d]\n",yytext,label,labelTable[label-1].address) ;
                                 }
                             }
 "JMP "{labelChars}[\n]      { 
-                            if(!tr)
-                            {
-                                lines += 1;
-                                printf("JMP [%s]\n",yytext) ;
+                                if(!tr)
+                                {
+                                    lines += 1;
+                                    //printf("JMP [%s]\n",yytext) ;
+                                }
+                                else 
+                                {
+                                    yytext[strlen(yytext)-1] = '\0' ;
+                                    //printf("JMP [%s]\n",yytext) ;
+                                    fprintf(f2,"JMP %d\n",searchLabel(yytext+4)) ;
+                                }
                             }
-                            else 
-                            {
-                                yytext[strlen(yytext)-1] = '\0' ;
-                                // printf("JMP [%s]\n",yytext) ;
-                                fprintf(f2,"JMP %d\n",searchLabel(yytext+4)) ;
-                            }
-                        }
 "JZ "{labelChars}[\n]      {
                             if(!tr)
                             {
                                 lines += 1;
-                                printf("JZ [%s]\n",yytext) ;
+                                //printf("JZ [%s]\n",yytext) ;
                             }
                             else
                             {
@@ -84,7 +84,7 @@ labelChars  [_a-zA-Z0-9,]+
                                 start[c] = '\0' ;
                                 yytext[strlen(yytext)-1] = '\0' ;
                                 
-                                // printf("%s,%d\n",start,searchLabel(yytext)) ;
+                                //printf("%s,%d\n",start,searchLabel(yytext)) ;
                                 fprintf(f2,"%s,%d\n",start,searchLabel(yytext)) ;
                             }
                         }
@@ -92,7 +92,7 @@ labelChars  [_a-zA-Z0-9,]+
                             if(!tr)
                             {
                                 lines += 1;
-                                printf("JNZ [%s]\n",yytext) ;
+                                //printf("JNZ [%s]\n",yytext) ;
                             }
                             else
                             {
@@ -105,7 +105,7 @@ labelChars  [_a-zA-Z0-9,]+
                                 start[c] = '\0' ;
                                 yytext[strlen(yytext)-1] = '\0' ;
 
-                                // printf("JNZ %d [%s]\n",c,yytext) ;
+                                //printf("JNZ %d [%s]\n",c,yytext) ;
                                 fprintf(f2,"%s,%d\n",start,searchLabel(yytext)) ;
                             }
                         }
@@ -113,11 +113,13 @@ labelChars  [_a-zA-Z0-9,]+
                             if(!tr)
                             {
                                 lines += 1;
-                                printf("CALL [%s]\n",yytext) ;
+                                //printf("CALL [%s]\n",yytext) ;
                             }
                             else 
                             {
                                 yytext[strlen(yytext)-1] = '\0' ;
+                                yytext += 5 ;
+                                //printf("Search for CALL : %s\n",yytext) ;
                                 fprintf(f2,"CALL %d\n",searchLabel(yytext)) ;
                             }
                         }
@@ -125,7 +127,7 @@ labelChars  [_a-zA-Z0-9,]+
                 if(!tr)
                 {
                     lines += 1 ;
-                    // printf("LINE [%s %d] \n",yytext,lines);
+                    //printf("LINE [%s %d] \n",yytext,lines);
                 }
                 else
                 {
@@ -152,6 +154,7 @@ int yywrap(void)
 
 void addLabel(char *labelName,int lineno) 
 {
+    printf("AddLabel %s\n",labelName) ;
     if(labelTable==NULL)
         labelTable = (Label*) calloc(1,sizeof(Label)) ;
     else 
@@ -165,12 +168,12 @@ int searchLabel(char *labelName)
 {   
     for(int i=0;i<label;i+=1)
     {
-        // printf("Search :%s \tMatch :%s \tAddr :%d Label\n",labelName,labelTable[i].labelName,labelTable[i].address) ;
+        printf("Search :%s| \tMatch :%s| \tAddr :%d Label\n",labelName,labelTable[i].labelName,labelTable[i].address) ;
         if(!strcmp(labelTable[i].labelName,labelName))
             return labelTable[i].address ;
     }
 
-    return 100 ;
+    return -1 ;
 }
 
 int main(int argc, char* argv[])

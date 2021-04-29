@@ -80,6 +80,8 @@
 
     int getReg(void) ;
     void freeReg(int) ;
+    void showRegs(void) ;
+    void copyRegs(int *,int *) ;
 
     int codeGen(tnode *Tree) ;
 
@@ -87,6 +89,7 @@
     void addGSymbol(tnode *Tree) ;
     void showGTable(void) ;
     void showLTable(LSymbol *table) ;
+    void setLTable(char *name,LSymbol *table) ;
     int getSymbol(char *name) ;
     void showParamList(ParamStruct *list) ;
     LSymbol *makeLocalTable(tnode *Node,tnode *decl) ;
@@ -95,21 +98,28 @@
     void assignTable(tnode *Tree,LSymbol *table) ;
     int getLAddress(tnode *Node) ;
     int getAddress(tnode *Node) ;
+    int getLabel(tnode *Node) ;
+    ParamStruct *getParams(tnode *Node) ;
 
     ParamStruct *makeParamlist(tnode *Tree,ParamStruct **paramList,int pars) ;
+    void addParams(LSymbol *table,ParamStruct *params) ;
+
 
     FILE *target_file ;
     int REG[20] ;
+
     int varSize = 0 ;
     int varEntry = 0 ;
     GSymbol *sTable = NULL ;
     int label = 0 ;
     int flabel = 0 ;
 
-    int lSize = 0 ;
+    int lSize = 1 ;
     int lEntry = 0 ;
 
-#line 113 "y.tab.c"
+    int addr = 0 ;
+
+#line 123 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -195,8 +205,10 @@ extern int yydebug;
     PARAM = 297,                   /* PARAM  */
     FUNCTION = 298,                /* FUNCTION  */
     FDEF = 299,                    /* FDEF  */
-    AND = 300,                     /* AND  */
-    OR = 301                       /* OR  */
+    CALL = 300,                    /* CALL  */
+    ARGLIST = 301,                 /* ARGLIST  */
+    AND = 302,                     /* AND  */
+    OR = 303                       /* OR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -247,8 +259,10 @@ extern int yydebug;
 #define PARAM 297
 #define FUNCTION 298
 #define FDEF 299
-#define AND 300
-#define OR 301
+#define CALL 300
+#define ARGLIST 301
+#define AND 302
+#define OR 303
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -312,46 +326,48 @@ enum yysymbol_kind_t
   YYSYMBOL_PARAM = 42,                     /* PARAM  */
   YYSYMBOL_FUNCTION = 43,                  /* FUNCTION  */
   YYSYMBOL_FDEF = 44,                      /* FDEF  */
-  YYSYMBOL_AND = 45,                       /* AND  */
-  YYSYMBOL_OR = 46,                        /* OR  */
-  YYSYMBOL_47_ = 47,                       /* ';'  */
-  YYSYMBOL_48_ = 48,                       /* ','  */
-  YYSYMBOL_49_ = 49,                       /* '['  */
-  YYSYMBOL_50_ = 50,                       /* ']'  */
-  YYSYMBOL_51_ = 51,                       /* '('  */
-  YYSYMBOL_52_ = 52,                       /* ')'  */
-  YYSYMBOL_53_ = 53,                       /* '{'  */
-  YYSYMBOL_54_ = 54,                       /* '}'  */
-  YYSYMBOL_YYACCEPT = 55,                  /* $accept  */
-  YYSYMBOL_program = 56,                   /* program  */
-  YYSYMBOL_GDeclBlock = 57,                /* GDeclBlock  */
-  YYSYMBOL_GDeclList = 58,                 /* GDeclList  */
-  YYSYMBOL_GDecl = 59,                     /* GDecl  */
-  YYSYMBOL_GidList = 60,                   /* GidList  */
-  YYSYMBOL_Gid = 61,                       /* Gid  */
-  YYSYMBOL_ParamList = 62,                 /* ParamList  */
-  YYSYMBOL_Param = 63,                     /* Param  */
-  YYSYMBOL_FDefBlock = 64,                 /* FDefBlock  */
-  YYSYMBOL_Fdef = 65,                      /* Fdef  */
-  YYSYMBOL_LDeclBlock = 66,                /* LDeclBlock  */
-  YYSYMBOL_LDeclList = 67,                 /* LDeclList  */
-  YYSYMBOL_LDecl = 68,                     /* LDecl  */
-  YYSYMBOL_Type = 69,                      /* Type  */
-  YYSYMBOL_MainBlock = 70,                 /* MainBlock  */
-  YYSYMBOL_IfStmt = 71,                    /* IfStmt  */
-  YYSYMBOL_WhStmt = 72,                    /* WhStmt  */
-  YYSYMBOL_LBody = 73,                     /* LBody  */
-  YYSYMBOL_Slist = 74,                     /* Slist  */
-  YYSYMBOL_Stmt = 75,                      /* Stmt  */
-  YYSYMBOL_Varlist = 76,                   /* Varlist  */
-  YYSYMBOL_RetStmt = 77,                   /* RetStmt  */
-  YYSYMBOL_BrkStmt = 78,                   /* BrkStmt  */
-  YYSYMBOL_Input = 79,                     /* Input  */
-  YYSYMBOL_Output = 80,                    /* Output  */
-  YYSYMBOL_Asgmt = 81,                     /* Asgmt  */
-  YYSYMBOL_E = 82,                         /* E  */
-  YYSYMBOL_ArgList = 83,                   /* ArgList  */
-  YYSYMBOL_ArrEl = 84                      /* ArrEl  */
+  YYSYMBOL_CALL = 45,                      /* CALL  */
+  YYSYMBOL_ARGLIST = 46,                   /* ARGLIST  */
+  YYSYMBOL_AND = 47,                       /* AND  */
+  YYSYMBOL_OR = 48,                        /* OR  */
+  YYSYMBOL_49_ = 49,                       /* ';'  */
+  YYSYMBOL_50_ = 50,                       /* ','  */
+  YYSYMBOL_51_ = 51,                       /* '['  */
+  YYSYMBOL_52_ = 52,                       /* ']'  */
+  YYSYMBOL_53_ = 53,                       /* '('  */
+  YYSYMBOL_54_ = 54,                       /* ')'  */
+  YYSYMBOL_55_ = 55,                       /* '{'  */
+  YYSYMBOL_56_ = 56,                       /* '}'  */
+  YYSYMBOL_YYACCEPT = 57,                  /* $accept  */
+  YYSYMBOL_program = 58,                   /* program  */
+  YYSYMBOL_GDeclBlock = 59,                /* GDeclBlock  */
+  YYSYMBOL_GDeclList = 60,                 /* GDeclList  */
+  YYSYMBOL_GDecl = 61,                     /* GDecl  */
+  YYSYMBOL_GidList = 62,                   /* GidList  */
+  YYSYMBOL_Gid = 63,                       /* Gid  */
+  YYSYMBOL_ParamList = 64,                 /* ParamList  */
+  YYSYMBOL_Param = 65,                     /* Param  */
+  YYSYMBOL_FDefBlock = 66,                 /* FDefBlock  */
+  YYSYMBOL_Fdef = 67,                      /* Fdef  */
+  YYSYMBOL_LDeclBlock = 68,                /* LDeclBlock  */
+  YYSYMBOL_LDeclList = 69,                 /* LDeclList  */
+  YYSYMBOL_LDecl = 70,                     /* LDecl  */
+  YYSYMBOL_Type = 71,                      /* Type  */
+  YYSYMBOL_MainBlock = 72,                 /* MainBlock  */
+  YYSYMBOL_IfStmt = 73,                    /* IfStmt  */
+  YYSYMBOL_WhStmt = 74,                    /* WhStmt  */
+  YYSYMBOL_LBody = 75,                     /* LBody  */
+  YYSYMBOL_Slist = 76,                     /* Slist  */
+  YYSYMBOL_Stmt = 77,                      /* Stmt  */
+  YYSYMBOL_Varlist = 78,                   /* Varlist  */
+  YYSYMBOL_RetStmt = 79,                   /* RetStmt  */
+  YYSYMBOL_BrkStmt = 80,                   /* BrkStmt  */
+  YYSYMBOL_Input = 81,                     /* Input  */
+  YYSYMBOL_Output = 82,                    /* Output  */
+  YYSYMBOL_Asgmt = 83,                     /* Asgmt  */
+  YYSYMBOL_E = 84,                         /* E  */
+  YYSYMBOL_ArgList = 85,                   /* ArgList  */
+  YYSYMBOL_ArrEl = 86                      /* ArrEl  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -673,19 +689,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  14
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   323
+#define YYLAST   335
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  55
+#define YYNTOKENS  57
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  30
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  74
+#define YYNRULES  77
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  166
+#define YYNSTATES  173
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   301
+#define YYMAXUTOK   303
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -703,15 +719,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      51,    52,     2,     2,    48,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,    47,
+      53,    54,     2,     2,    50,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    49,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    49,     2,    50,     2,     2,     2,     2,     2,     2,
+       2,    51,     2,    52,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    53,     2,    54,     2,     2,     2,     2,
+       2,     2,     2,    55,     2,    56,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -729,21 +745,21 @@ static const yytype_int8 yytranslate[] =
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46
+      45,    46,    47,    48
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    58,    58,    71,    83,    97,    98,   101,   102,   105,
-     112,   115,   118,   121,   126,   133,   137,   138,   141,   148,
-     149,   152,   162,   163,   166,   167,   170,   177,   178,   179,
-     182,   192,   196,   199,   204,   205,   208,   209,   212,   213,
-     214,   215,   216,   217,   218,   221,   225,   232,   237,   245,
-     248,   251,   255,   261,   267,   268,   271,   284,   297,   298,
-     299,   300,   301,   302,   303,   304,   305,   306,   307,   308,
-     309,   310,   312,   313,   315
+       0,    69,    69,    85,    99,   113,   114,   117,   118,   121,
+     128,   131,   134,   137,   142,   149,   153,   154,   157,   164,
+     165,   168,   183,   202,   203,   206,   207,   210,   217,   218,
+     219,   222,   235,   251,   255,   258,   263,   264,   267,   268,
+     271,   272,   273,   274,   275,   276,   277,   280,   284,   291,
+     296,   304,   307,   310,   314,   320,   326,   327,   330,   343,
+     356,   357,   358,   359,   360,   361,   362,   363,   364,   365,
+     366,   367,   368,   369,   370,   372,   377,   383
 };
 #endif
 
@@ -764,13 +780,13 @@ static const char *const yytname[] =
   "THEN", "ELSE", "ENDIF", "IFTHEN", "WHILE", "DO", "ENDWHILE", "LT", "GT",
   "LTE", "GTE", "EE", "NE", "DECL", "ENDDECL", "IDDECL", "EXPR", "MAIN",
   "RETURN", "ERROR", "INT", "BOOL", "STR", "TYPE", "IDLIST", "STRING",
-  "ARRAY", "PARAM", "FUNCTION", "FDEF", "AND", "OR", "';'", "','", "'['",
-  "']'", "'('", "')'", "'{'", "'}'", "$accept", "program", "GDeclBlock",
-  "GDeclList", "GDecl", "GidList", "Gid", "ParamList", "Param",
-  "FDefBlock", "Fdef", "LDeclBlock", "LDeclList", "LDecl", "Type",
-  "MainBlock", "IfStmt", "WhStmt", "LBody", "Slist", "Stmt", "Varlist",
-  "RetStmt", "BrkStmt", "Input", "Output", "Asgmt", "E", "ArgList",
-  "ArrEl", YY_NULLPTR
+  "ARRAY", "PARAM", "FUNCTION", "FDEF", "CALL", "ARGLIST", "AND", "OR",
+  "';'", "','", "'['", "']'", "'('", "')'", "'{'", "'}'", "$accept",
+  "program", "GDeclBlock", "GDeclList", "GDecl", "GidList", "Gid",
+  "ParamList", "Param", "FDefBlock", "Fdef", "LDeclBlock", "LDeclList",
+  "LDecl", "Type", "MainBlock", "IfStmt", "WhStmt", "LBody", "Slist",
+  "Stmt", "Varlist", "RetStmt", "BrkStmt", "Input", "Output", "Asgmt", "E",
+  "ArgList", "ArrEl", YY_NULLPTR
 };
 
 static const char *
@@ -789,12 +805,12 @@ static const yytype_int16 yytoknum[] =
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,   299,   300,   301,    59,    44,    91,
-      93,    40,    41,   123,   125
+     295,   296,   297,   298,   299,   300,   301,   302,   303,    59,
+      44,    91,    93,    40,    41,   123,   125
 };
 #endif
 
-#define YYPACT_NINF (-107)
+#define YYPACT_NINF (-101)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -808,23 +824,24 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      -9,   100,   -29,    49,    31,  -107,  -107,  -107,  -107,  -107,
-     221,  -107,    64,    26,  -107,   -29,    31,  -107,    71,  -107,
-    -107,  -107,    23,   -18,  -107,    32,  -107,  -107,    36,    91,
-      57,  -107,    64,    47,    57,    55,   -46,  -107,    97,  -107,
-      89,   -25,  -107,    57,  -107,  -107,   283,   111,    65,  -107,
-    -107,   286,  -107,   110,   229,    72,    89,  -107,  -107,    78,
-       9,    81,  -107,    79,    80,    -6,    87,    94,    13,  -107,
-    -107,   246,  -107,  -107,  -107,  -107,  -107,  -107,   119,  -107,
-     111,   127,  -107,   140,  -107,   142,    13,    13,    13,    13,
-      13,    39,  -107,  -107,   137,  -107,  -107,  -107,    13,    92,
-     102,   116,     2,   114,    37,   163,   131,    88,    98,     6,
-      13,    13,    13,    13,    13,    13,    13,    13,    13,    13,
-    -107,   169,  -107,  -107,   155,   121,   122,   123,  -107,  -107,
-     156,   152,  -107,   195,   -24,  -107,   165,   282,   282,   282,
-     282,   282,   282,   201,   201,  -107,   128,  -107,  -107,  -107,
-     281,   281,    13,  -107,  -107,    62,   261,   195,   281,   150,
-     151,   264,  -107,  -107,   153,  -107
+     -16,    38,   -30,    15,   103,  -101,  -101,  -101,  -101,  -101,
+      41,  -101,    62,    33,  -101,   -30,   103,  -101,    78,  -101,
+    -101,  -101,   112,   -27,  -101,    35,  -101,  -101,    45,    89,
+     116,  -101,    62,    47,   116,    54,   -20,  -101,   101,  -101,
+      -1,    -5,  -101,   116,  -101,  -101,   252,    68,   106,    63,
+      86,  -101,    99,  -101,   107,   113,    -3,   118,   135,    16,
+    -101,  -101,   267,  -101,  -101,  -101,  -101,  -101,  -101,   141,
+    -101,   168,  -101,   146,   134,  -101,    -1,  -101,   150,    16,
+      16,    16,    16,    16,   136,  -101,  -101,    16,   151,  -101,
+    -101,  -101,    16,  -101,  -101,   160,     1,  -101,   106,   145,
+      34,   148,    36,   159,   120,    69,   102,    12,   110,    16,
+      16,    16,    16,    16,    16,    16,    16,    16,    16,  -101,
+     169,   200,  -101,   204,   158,  -101,   166,   178,   179,  -101,
+    -101,   214,   210,  -101,   199,    18,  -101,   227,  -101,   303,
+     303,   303,   303,   303,   303,   209,   209,  -101,   187,   189,
+    -101,  -101,  -101,  -101,   302,   302,    16,  -101,  -101,   232,
+     234,   275,   199,   193,   302,   203,   205,  -101,   284,  -101,
+    -101,   213,  -101
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -832,39 +849,40 @@ static const yytype_int16 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     4,     6,    27,    29,    28,
-       0,     8,     0,     0,     1,    27,     0,    20,     0,     3,
+       0,     0,     0,     0,     0,     4,     6,    28,    30,    29,
+       0,     8,     0,     0,     1,    28,     0,    20,     0,     3,
        5,     7,    12,     0,    11,     0,    19,     2,     0,     0,
       17,     9,     0,     0,    17,     0,     0,    16,     0,    10,
-       0,     0,    13,     0,    14,    18,     0,     0,     0,    15,
-      23,     0,    25,     0,     0,     0,     0,    22,    24,    47,
-       0,     0,    35,     0,     0,     0,     0,     0,     0,    41,
-      42,     0,    37,    44,    43,    38,    39,    40,     0,    30,
-       0,     0,    26,     0,    50,     0,     0,     0,     0,     0,
-       0,    66,    69,    70,     0,    71,    34,    36,     0,     0,
-       0,    45,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,    13,     0,    14,    18,     0,     0,     0,     0,
+       0,    15,     0,    37,     0,     0,     0,     0,     0,     0,
+      43,    44,     0,    39,    46,    45,    40,    41,    42,     0,
+      24,     0,    26,     0,     0,    32,     0,    52,     0,     0,
+       0,     0,     0,     0,    68,    71,    72,     0,     0,    73,
+      36,    38,     0,    23,    25,    49,     0,    31,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      49,     0,    21,    48,     0,     0,     0,     0,    54,    74,
-       0,     0,    67,    73,     0,    56,    57,    58,    59,    62,
-      63,    60,    61,    65,    64,    55,     0,    51,    52,    53,
-       0,     0,     0,    68,    46,     0,     0,    72,     0,     0,
-       0,     0,    32,    33,     0,    31
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    51,
+       0,     0,    27,     0,     0,    22,     0,     0,     0,    56,
+      77,     0,     0,    69,    76,     0,    74,    58,    59,    60,
+      61,    64,    65,    62,    63,    67,    66,    57,     0,    47,
+      21,    53,    54,    55,     0,     0,     0,    70,    50,     0,
+       0,     0,    75,     0,     0,     0,     0,    48,     0,    34,
+      35,     0,    33
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -107,  -107,  -107,  -107,   189,  -107,   170,   167,   160,  -107,
-     188,   157,  -107,   178,     4,     0,  -107,  -107,   154,  -106,
-     -70,  -107,  -107,  -107,  -107,  -107,  -107,   -77,  -107,   -54
+    -101,  -101,  -101,  -101,   239,  -101,   231,   230,   222,  -101,
+     253,   192,  -101,   201,    10,    13,  -101,  -101,   -45,  -100,
+     -61,  -101,  -101,  -101,  -101,  -101,  -101,   -74,  -101,   -46
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_uint8 yydefgoto[] =
 {
        0,     3,     4,    10,    11,    23,    24,    36,    37,    16,
-      17,    47,    51,    52,    38,     5,    69,    70,    55,    71,
-      72,    60,    73,    74,    75,    76,    77,    94,   134,    95
+      17,    48,    71,    72,    38,     5,    60,    61,    49,    62,
+      63,    96,    64,    65,    66,    67,    68,    88,   135,    89
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -872,112 +890,115 @@ static const yytype_uint8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      78,    97,    43,    13,    19,    12,    44,    87,    18,   104,
-     105,   106,   107,   108,    12,    91,    27,    78,    92,     1,
-      18,   121,    91,    43,   152,    92,     2,    48,   153,    31,
-      32,   103,   133,   135,   136,   137,   138,   139,   140,   141,
-     142,   143,   144,    88,   155,   156,    93,   110,   111,    14,
-      53,    88,   161,    93,   125,    53,    82,    83,   132,   112,
-     113,   114,   115,   116,   117,    61,    15,     8,     9,    63,
-      64,    65,    29,    22,    30,   157,    66,    25,   158,   159,
-      28,    67,   118,   119,    33,    97,    97,    34,    88,   127,
-     109,    97,     7,     8,     9,    68,    78,    78,   110,   111,
-      40,    78,    78,    35,    78,    42,    45,    78,   110,   111,
-     112,   113,   114,   115,   116,   117,    54,    46,    56,    59,
-     112,   113,   114,   115,   116,   117,    79,    81,    84,     6,
-      85,    86,    98,   118,   119,     7,     8,     9,    89,   100,
-     130,   110,   111,   118,   119,    90,   122,   110,   111,   101,
-     131,   102,   123,   112,   113,   114,   115,   116,   117,   112,
-     113,   114,   115,   116,   117,   124,   126,   146,   147,   148,
-     149,   150,   151,   110,   111,   110,   118,   119,   154,   110,
-     111,   129,   118,   119,   120,   112,   113,   114,   115,   116,
-     117,   112,   113,   114,   115,   116,   117,   162,   163,    21,
-     165,    41,    39,    49,    26,   110,   111,     0,   118,   119,
-     128,   110,   111,    80,   118,   119,   145,   112,   113,   114,
-     115,   116,   117,   112,   113,   114,   115,   116,   117,    58,
-       0,     0,    61,     0,    99,    62,    63,    64,    65,     0,
-     118,   119,     0,    66,     0,     0,    -1,    -1,    67,    61,
-      20,     0,    96,    63,    64,    65,     7,     8,     9,     0,
-      66,     0,    68,     0,    61,    67,     0,    61,    63,    64,
-      65,    63,    64,    65,     0,    66,     0,     0,    66,    68,
-      67,   164,   160,    67,    61,     0,     0,     0,    63,    64,
-      65,     0,   110,   111,    68,    66,     0,    68,     0,     0,
-      67,     0,     0,     0,    -1,    -1,    -1,    -1,    -1,    -1,
-       0,     0,    50,     0,    68,    57,     0,     0,     7,     8,
-       9,     7,     8,     9
+      69,    91,    13,    74,    46,   102,   103,   104,   105,   106,
+      80,    12,     1,   108,    18,    14,    69,    19,   120,     2,
+      12,    84,    31,    32,    85,    84,    18,    47,    85,    27,
+      43,    99,   101,   134,    44,   137,   138,   139,   140,   141,
+     142,   143,   144,   145,   146,    43,   109,   110,    81,    50,
+     122,   123,    86,   124,   160,   161,    86,    73,   111,   112,
+     113,   114,   115,   116,   168,    87,   133,     6,   156,    87,
+      20,    22,   157,     7,     8,     9,     7,     8,     9,   109,
+     110,    73,   162,   117,   118,    81,    25,    28,   126,    33,
+     128,   111,   112,   113,   114,   115,   116,    70,    34,    91,
+      91,    35,    40,     7,     8,     9,    42,    91,    69,    69,
+      45,    46,   109,   110,    69,    69,   117,   118,    69,    75,
+     109,   110,    69,   131,   111,   112,   113,   114,   115,   116,
+     109,   110,   111,   112,   113,   114,   115,   116,    15,     8,
+       9,    76,   111,   112,   113,   114,   115,   116,    77,   117,
+     118,     7,     8,     9,    92,    95,   132,   117,   118,   100,
+      78,   109,   110,    29,   136,    30,    79,   117,   118,   109,
+     110,    82,   130,   111,   112,   113,   114,   115,   116,   109,
+     110,   111,   112,   113,   114,   115,   116,    81,    83,   107,
+      97,   111,   112,   113,   114,   115,   116,    93,   117,   118,
+     119,   125,   127,     7,     8,     9,   117,   118,   129,   109,
+     110,   121,   148,   149,   150,   151,   117,   118,   147,   109,
+     110,   111,   112,   113,   114,   115,   116,   152,   153,   154,
+     155,   111,   112,   113,   114,   115,   116,    52,   110,   158,
+     159,    54,    55,    56,   163,   167,   117,   118,    57,    21,
+     164,   165,   169,    58,   170,    52,    -1,    -1,    53,    54,
+      55,    56,   172,    39,    41,    51,    57,    59,    98,    26,
+      52,    58,    94,    90,    54,    55,    56,     0,    52,     0,
+       0,    57,    54,    55,    56,    59,    58,    52,     0,    57,
+       0,    54,    55,    56,    58,     0,   166,     0,    57,     0,
+      59,   171,     0,    58,     0,    52,     0,     0,    59,    54,
+      55,    56,     0,   109,   110,     0,    57,    59,     0,     0,
+       0,    58,     0,     0,     0,    -1,    -1,    -1,    -1,    -1,
+      -1,     0,     0,     0,     0,    59
 };
 
 static const yytype_int16 yycheck[] =
 {
-      54,    71,    48,    32,     4,     1,    52,    13,     4,    86,
-      87,    88,    89,    90,    10,     9,    16,    71,    12,    28,
-      16,    98,     9,    48,    48,    12,    35,    52,    52,    47,
-      48,    85,   109,   110,   111,   112,   113,   114,   115,   116,
-     117,   118,   119,    49,   150,   151,    40,    10,    11,     0,
-      46,    49,   158,    40,    52,    51,    47,    48,    52,    22,
-      23,    24,    25,    26,    27,     3,    35,    36,    37,     7,
-       8,     9,    49,     9,    51,   152,    14,    51,    16,    17,
-       9,    19,    45,    46,    52,   155,   156,    51,    49,    52,
-      51,   161,    35,    36,    37,    33,   150,   151,    10,    11,
-      53,   155,   156,    12,   158,    50,     9,   161,    10,    11,
-      22,    23,    24,    25,    26,    27,     5,    28,    53,     9,
-      22,    23,    24,    25,    26,    27,    54,    49,    47,    29,
-      51,    51,    13,    45,    46,    35,    36,    37,    51,    12,
-      52,    10,    11,    45,    46,    51,    54,    10,    11,     9,
-      52,     9,    50,    22,    23,    24,    25,    26,    27,    22,
-      23,    24,    25,    26,    27,    49,    52,    12,    47,    47,
-      47,    15,    20,    10,    11,    10,    45,    46,    50,    10,
-      11,    50,    45,    46,    47,    22,    23,    24,    25,    26,
-      27,    22,    23,    24,    25,    26,    27,    47,    47,    10,
-      47,    34,    32,    43,    16,    10,    11,    -1,    45,    46,
-      47,    10,    11,    56,    45,    46,    47,    22,    23,    24,
-      25,    26,    27,    22,    23,    24,    25,    26,    27,    51,
-      -1,    -1,     3,    -1,    80,     6,     7,     8,     9,    -1,
-      45,    46,    -1,    14,    -1,    -1,    45,    46,    19,     3,
-      29,    -1,     6,     7,     8,     9,    35,    36,    37,    -1,
-      14,    -1,    33,    -1,     3,    19,    -1,     3,     7,     8,
-       9,     7,     8,     9,    -1,    14,    -1,    -1,    14,    33,
-      19,    17,    21,    19,     3,    -1,    -1,    -1,     7,     8,
-       9,    -1,    10,    11,    33,    14,    -1,    33,    -1,    -1,
-      19,    -1,    -1,    -1,    22,    23,    24,    25,    26,    27,
-      -1,    -1,    29,    -1,    33,    29,    -1,    -1,    35,    36,
-      37,    35,    36,    37
+      46,    62,    32,    48,     5,    79,    80,    81,    82,    83,
+      13,     1,    28,    87,     4,     0,    62,     4,    92,    35,
+      10,     9,    49,    50,    12,     9,    16,    28,    12,    16,
+      50,    76,    78,   107,    54,   109,   110,   111,   112,   113,
+     114,   115,   116,   117,   118,    50,    10,    11,    51,    54,
+      49,    50,    40,    98,   154,   155,    40,    47,    22,    23,
+      24,    25,    26,    27,   164,    53,    54,    29,    50,    53,
+      29,     9,    54,    35,    36,    37,    35,    36,    37,    10,
+      11,    71,   156,    47,    48,    51,    53,     9,    54,    54,
+      54,    22,    23,    24,    25,    26,    27,    29,    53,   160,
+     161,    12,    55,    35,    36,    37,    52,   168,   154,   155,
+       9,     5,    10,    11,   160,   161,    47,    48,   164,    56,
+      10,    11,   168,    54,    22,    23,    24,    25,    26,    27,
+      10,    11,    22,    23,    24,    25,    26,    27,    35,    36,
+      37,    55,    22,    23,    24,    25,    26,    27,    49,    47,
+      48,    35,    36,    37,    13,     9,    54,    47,    48,     9,
+      53,    10,    11,    51,    54,    53,    53,    47,    48,    10,
+      11,    53,    52,    22,    23,    24,    25,    26,    27,    10,
+      11,    22,    23,    24,    25,    26,    27,    51,    53,    53,
+      56,    22,    23,    24,    25,    26,    27,    29,    47,    48,
+      49,    56,    54,    35,    36,    37,    47,    48,    49,    10,
+      11,    51,    12,     9,    56,    49,    47,    48,    49,    10,
+      11,    22,    23,    24,    25,    26,    27,    49,    49,    15,
+      20,    22,    23,    24,    25,    26,    27,     3,    11,    52,
+      51,     7,     8,     9,    12,    52,    47,    48,    14,    10,
+      16,    17,    49,    19,    49,     3,    47,    48,     6,     7,
+       8,     9,    49,    32,    34,    43,    14,    33,    76,    16,
+       3,    19,    71,     6,     7,     8,     9,    -1,     3,    -1,
+      -1,    14,     7,     8,     9,    33,    19,     3,    -1,    14,
+      -1,     7,     8,     9,    19,    -1,    21,    -1,    14,    -1,
+      33,    17,    -1,    19,    -1,     3,    -1,    -1,    33,     7,
+       8,     9,    -1,    10,    11,    -1,    14,    33,    -1,    -1,
+      -1,    19,    -1,    -1,    -1,    22,    23,    24,    25,    26,
+      27,    -1,    -1,    -1,    -1,    33
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    28,    35,    56,    57,    70,    29,    35,    36,    37,
-      58,    59,    69,    32,     0,    35,    64,    65,    69,    70,
-      29,    59,     9,    60,    61,    51,    65,    70,     9,    49,
-      51,    47,    48,    52,    51,    12,    62,    63,    69,    61,
-      53,    62,    50,    48,    52,     9,    28,    66,    52,    63,
-      29,    67,    68,    69,     5,    73,    53,    29,    68,     9,
-      76,     3,     6,     7,     8,     9,    14,    19,    33,    71,
-      72,    74,    75,    77,    78,    79,    80,    81,    84,    54,
-      66,    49,    47,    48,    47,    51,    51,    13,    49,    51,
-      51,     9,    12,    40,    82,    84,     6,    75,    13,    73,
-      12,     9,     9,    84,    82,    82,    82,    82,    82,    51,
-      10,    11,    22,    23,    24,    25,    26,    27,    45,    46,
-      47,    82,    54,    50,    49,    52,    52,    52,    47,    50,
-      52,    52,    52,    82,    83,    82,    82,    82,    82,    82,
-      82,    82,    82,    82,    82,    47,    12,    47,    47,    47,
-      15,    20,    48,    52,    50,    74,    74,    82,    16,    17,
-      21,    74,    47,    47,    17,    47
+       0,    28,    35,    58,    59,    72,    29,    35,    36,    37,
+      60,    61,    71,    32,     0,    35,    66,    67,    71,    72,
+      29,    61,     9,    62,    63,    53,    67,    72,     9,    51,
+      53,    49,    50,    54,    53,    12,    64,    65,    71,    63,
+      55,    64,    52,    50,    54,     9,     5,    28,    68,    75,
+      54,    65,     3,     6,     7,     8,     9,    14,    19,    33,
+      73,    74,    76,    77,    79,    80,    81,    82,    83,    86,
+      29,    69,    70,    71,    75,    56,    55,    49,    53,    53,
+      13,    51,    53,    53,     9,    12,    40,    53,    84,    86,
+       6,    77,    13,    29,    70,     9,    78,    56,    68,    75,
+       9,    86,    84,    84,    84,    84,    84,    53,    84,    10,
+      11,    22,    23,    24,    25,    26,    27,    47,    48,    49,
+      84,    51,    49,    50,    75,    56,    54,    54,    54,    49,
+      52,    54,    54,    54,    84,    85,    54,    84,    84,    84,
+      84,    84,    84,    84,    84,    84,    84,    49,    12,     9,
+      56,    49,    49,    49,    15,    20,    50,    54,    52,    51,
+      76,    76,    84,    12,    16,    17,    21,    52,    76,    49,
+      49,    17,    49
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    55,    56,    56,    56,    57,    57,    58,    58,    59,
-      60,    60,    61,    61,    61,    62,    62,    62,    63,    64,
-      64,    65,    66,    66,    67,    67,    68,    69,    69,    69,
-      70,    71,    71,    72,    73,    73,    74,    74,    75,    75,
-      75,    75,    75,    75,    75,    76,    76,    76,    76,    77,
-      78,    79,    79,    80,    81,    81,    82,    82,    82,    82,
-      82,    82,    82,    82,    82,    82,    82,    82,    82,    82,
-      82,    82,    83,    83,    84
+       0,    57,    58,    58,    58,    59,    59,    60,    60,    61,
+      62,    62,    63,    63,    63,    64,    64,    64,    65,    66,
+      66,    67,    67,    68,    68,    69,    69,    70,    71,    71,
+      71,    72,    72,    73,    73,    74,    75,    75,    76,    76,
+      77,    77,    77,    77,    77,    77,    77,    78,    78,    78,
+      78,    79,    80,    81,    81,    82,    83,    83,    84,    84,
+      84,    84,    84,    84,    84,    84,    84,    84,    84,    84,
+      84,    84,    84,    84,    84,    85,    85,    86
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -985,12 +1006,12 @@ static const yytype_int8 yyr2[] =
 {
        0,     2,     3,     2,     1,     3,     2,     2,     1,     3,
        3,     1,     1,     4,     4,     3,     1,     0,     2,     2,
-       1,     9,     3,     2,     2,     1,     3,     1,     1,     1,
-       8,    10,     8,     8,     3,     2,     2,     1,     1,     1,
-       1,     1,     1,     1,     1,     3,     6,     1,     4,     3,
-       2,     5,     5,     5,     4,     4,     3,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     1,     3,     4,     1,
-       1,     1,     3,     1,     4
+       1,     9,     8,     3,     2,     2,     1,     3,     1,     1,
+       1,     8,     7,    10,     8,     8,     3,     2,     2,     1,
+       1,     1,     1,     1,     1,     1,     1,     3,     6,     1,
+       4,     3,     2,     5,     5,     5,     4,     4,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     1,     3,
+       4,     1,     1,     1,     3,     3,     1,     4
 };
 
 
@@ -1458,154 +1479,159 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: GDeclBlock FDefBlock MainBlock  */
-#line 58 "t_1.y"
+#line 69 "t_1.y"
                                              {
-                                                printf("GDecFDecMainBlock\n") ;
+                                                // printf("GDecFDecMainBlock\n") ;
                                                 fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-                                                fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096);
+                                                fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096+varSize+1);
                                                 
                                                 printf("------%15s  -----\n","Global") ;
                                                 showGTable() ;
                                                 printf("----------------------------\n") ;
-                                                // codeGen($2) ;
-                                                // codeGen($3) ;
+                                                fprintf(target_file,"PUSH R0\n") ;
+                                                fprintf(target_file,"CALL _MAIN\n") ;
+                                                fprintf(target_file,"INT 10\n") ;
+                                                codeGen(yyvsp[-1]) ;
+                                                codeGen(yyvsp[0]) ;
                                                 fprintf(target_file,"INT 10\n") ;
                                                 exit(0);
                                               }
-#line 1476 "y.tab.c"
+#line 1500 "y.tab.c"
     break;
 
   case 3: /* program: GDeclBlock MainBlock  */
-#line 71 "t_1.y"
+#line 85 "t_1.y"
                                               {
-                                                printf("GDecMainBlock\n") ;
+                                                // printf("GDecMainBlock\n") ;
                                                 fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-                                                fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096);
+                                                fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096+varSize+1);
                                                 
                                                 printf("------%15s  -----\n","Global") ;
                                                 showGTable() ;
                                                 printf("----------------------------\n") ;
-                                                // codeGen($2) ;
+                                                fprintf(target_file,"CALL _MAIN\n") ;
+                                                fprintf(target_file,"INT 10\n") ;
+                                                codeGen(yyvsp[0]) ;
                                                 fprintf(target_file,"INT 10\n") ;
                                                 exit(0);
                                               }
-#line 1493 "y.tab.c"
+#line 1519 "y.tab.c"
     break;
 
   case 4: /* program: MainBlock  */
-#line 83 "t_1.y"
+#line 99 "t_1.y"
                                               {
                                                 printf("MainBlock\n") ;
                                                 fprintf(target_file,"%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-                                                fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096);
+                                                fprintf(target_file,"MOV SP,%d\nMOV BP,%d\n",4096+varSize,4096+varSize+1);
                                                 
                                                 printf("------%15s  -----\n","Global") ;
                                                 showGTable() ;
                                                 printf("----------------------------\n") ;
-                                                // codeGen($1) ;
+                                                codeGen(yyvsp[0]) ;
                                                 fprintf(target_file,"INT 10\n") ;
                                                 exit(0);
                                               }
-#line 1510 "y.tab.c"
+#line 1536 "y.tab.c"
     break;
 
   case 9: /* GDecl: Type GidList ';'  */
-#line 105 "t_1.y"
+#line 121 "t_1.y"
                                               {
                                                 assignType(yyvsp[-1],yyvsp[-2]->type) ;
                                                 addGSymbols(yyvsp[-1]) ;
                                                 yyval = yyvsp[-1] ;
                                               }
-#line 1520 "y.tab.c"
+#line 1546 "y.tab.c"
     break;
 
   case 10: /* GidList: GidList ',' Gid  */
-#line 112 "t_1.y"
+#line 128 "t_1.y"
                                           {
                                             yyval = (YYSTYPE) createTree(0,-1,IDLIST,IDLIST,NULL,yyvsp[-2],yyvsp[0]);
                                           }
-#line 1528 "y.tab.c"
+#line 1554 "y.tab.c"
     break;
 
   case 11: /* GidList: Gid  */
-#line 115 "t_1.y"
+#line 131 "t_1.y"
                                           {yyval = yyvsp[0];}
-#line 1534 "y.tab.c"
+#line 1560 "y.tab.c"
     break;
 
   case 12: /* Gid: ID  */
-#line 118 "t_1.y"
+#line 134 "t_1.y"
                                           {
                                             yyval = yyvsp[0] ;
                                           }
-#line 1542 "y.tab.c"
+#line 1568 "y.tab.c"
     break;
 
   case 13: /* Gid: ID '[' NUM ']'  */
-#line 121 "t_1.y"
+#line 137 "t_1.y"
                                           {
                                             yyval = yyvsp[-3] ;
                                             yyval->nodeType = ARRAY ;
                                             yyval->left = yyvsp[-1] ;
                                           }
-#line 1552 "y.tab.c"
+#line 1578 "y.tab.c"
     break;
 
   case 14: /* Gid: ID '(' ParamList ')'  */
-#line 126 "t_1.y"
+#line 142 "t_1.y"
                                           {
                                             yyval = yyvsp[-3] ;
                                             yyval->nodeType = FUNCTION ;
                                             yyval->left = yyvsp[-1] ;
                                           }
-#line 1562 "y.tab.c"
+#line 1588 "y.tab.c"
     break;
 
   case 15: /* ParamList: ParamList ',' Param  */
-#line 133 "t_1.y"
+#line 149 "t_1.y"
                                       {
                                         yyval = yyvsp[0];
                                         yyval->left = yyvsp[-2];
                                       }
-#line 1571 "y.tab.c"
+#line 1597 "y.tab.c"
     break;
 
   case 16: /* ParamList: Param  */
-#line 137 "t_1.y"
+#line 153 "t_1.y"
                                       {yyval = yyvsp[0] ;}
-#line 1577 "y.tab.c"
+#line 1603 "y.tab.c"
     break;
 
   case 17: /* ParamList: %empty  */
-#line 138 "t_1.y"
+#line 154 "t_1.y"
                                       {printf("Empty ParList") ;}
-#line 1583 "y.tab.c"
+#line 1609 "y.tab.c"
     break;
 
   case 18: /* Param: Type ID  */
-#line 141 "t_1.y"
+#line 157 "t_1.y"
                                       {
                                         yyval = yyvsp[0] ;
                                         yyval->type = yyvsp[-1]->type ;
                                         yyval->nodeType = PARAM ;
                                       }
-#line 1593 "y.tab.c"
+#line 1619 "y.tab.c"
     break;
 
   case 19: /* FDefBlock: FDefBlock Fdef  */
-#line 148 "t_1.y"
+#line 164 "t_1.y"
                                             {yyval = (YYSTYPE) createTree(0,-1,Connector,Connector,NULL,yyvsp[-1],yyvsp[0]);}
-#line 1599 "y.tab.c"
+#line 1625 "y.tab.c"
     break;
 
   case 20: /* FDefBlock: Fdef  */
-#line 149 "t_1.y"
+#line 165 "t_1.y"
                                             {yyval = yyvsp[0];}
-#line 1605 "y.tab.c"
+#line 1631 "y.tab.c"
     break;
 
   case 21: /* Fdef: Type ID '(' ParamList ')' '{' LDeclBlock LBody '}'  */
-#line 152 "t_1.y"
+#line 168 "t_1.y"
                                                                     {
                                                                       yyval = yyvsp[-7] ;
                                                                       yyval->type = yyvsp[-8]->type ;
@@ -1613,169 +1639,228 @@ yyreduce:
                                                                       yyval->sTable = makeLocalTable(yyval,yyvsp[-2]) ;
                                                                       yyval->left = yyvsp[-5] ;
                                                                       yyval->right = yyvsp[-1] ;
+                                                                      assignTable(yyval,yyval->sTable) ;
+                                                                      addParams(yyval->sTable,getParams(yyval)) ;
+                                                                      setLTable(yyval->varName,yyval->sTable) ;
+                                                                      
+                                                                      printf("------%15s  -----\n",yyval->varName) ;
+                                                                      showLTable(yyval->sTable) ;
+                                                                      printf("----------------------------\n") ;
                                                                     }
-#line 1618 "y.tab.c"
+#line 1651 "y.tab.c"
     break;
 
-  case 22: /* LDeclBlock: DECL LDeclList ENDDECL  */
-#line 162 "t_1.y"
+  case 22: /* Fdef: Type ID '(' ParamList ')' '{' LBody '}'  */
+#line 183 "t_1.y"
+                                                                    {
+                                                                      yyval = yyvsp[-6] ;
+                                                                      yyval->type = yyvsp[-7]->type ;
+                                                                      yyval->nodeType = FUNCTION ;
+                                                                      yyval->sTable = calloc(1,sizeof(LSymbol)) ;
+                                                                      yyval->sTable->name = "NULL" ;
+                                                                      yyval->sTable->next = NULL ;
+                                                                      yyval->left = yyvsp[-4] ;
+                                                                      yyval->right = yyvsp[-1] ;
+                                                                      assignTable(yyval,yyval->sTable) ;
+                                                                      addParams(yyval->sTable,getParams(yyval)) ;
+                                                                      setLTable(yyval->varName,yyval->sTable) ;
+                                                                      
+                                                                      printf("------%15s  -----\n",yyval->varName) ;
+                                                                      showLTable(yyval->sTable) ;
+                                                                      printf("----------------------------\n") ;
+                                                                    }
+#line 1673 "y.tab.c"
+    break;
+
+  case 23: /* LDeclBlock: DECL LDeclList ENDDECL  */
+#line 202 "t_1.y"
                                                       {yyval = yyvsp[-1] ;}
-#line 1624 "y.tab.c"
+#line 1679 "y.tab.c"
     break;
 
-  case 23: /* LDeclBlock: DECL ENDDECL  */
-#line 163 "t_1.y"
+  case 24: /* LDeclBlock: DECL ENDDECL  */
+#line 203 "t_1.y"
                                                       {yyval = NULL ;}
-#line 1630 "y.tab.c"
+#line 1685 "y.tab.c"
     break;
 
-  case 24: /* LDeclList: LDeclList LDecl  */
-#line 166 "t_1.y"
-                                                      {yyval = (YYSTYPE) createTree(0,-1,Connector,IDDECL,NULL,NULL,NULL);}
-#line 1636 "y.tab.c"
+  case 25: /* LDeclList: LDeclList LDecl  */
+#line 206 "t_1.y"
+                                                      {yyval = (YYSTYPE) createTree(0,-1,Connector,IDDECL,NULL,yyvsp[-1],yyvsp[0]);}
+#line 1691 "y.tab.c"
     break;
 
-  case 25: /* LDeclList: LDecl  */
-#line 167 "t_1.y"
+  case 26: /* LDeclList: LDecl  */
+#line 207 "t_1.y"
                                                       {yyval = yyvsp[0];}
-#line 1642 "y.tab.c"
+#line 1697 "y.tab.c"
     break;
 
-  case 26: /* LDecl: Type Varlist ';'  */
-#line 170 "t_1.y"
+  case 27: /* LDecl: Type Varlist ';'  */
+#line 210 "t_1.y"
                                                       {
                                                         assignType(yyvsp[-1],yyvsp[-2]->type) ;
                                                         // printf("Local Table %d\n",$1->type) ;
                                                         yyval = yyvsp[-1] ;
                                                       }
-#line 1652 "y.tab.c"
+#line 1707 "y.tab.c"
     break;
 
-  case 27: /* Type: INT  */
-#line 177 "t_1.y"
+  case 28: /* Type: INT  */
+#line 217 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,TYPE,INT,NULL,NULL,NULL);}
-#line 1658 "y.tab.c"
+#line 1713 "y.tab.c"
     break;
 
-  case 28: /* Type: STR  */
-#line 178 "t_1.y"
+  case 29: /* Type: STR  */
+#line 218 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,TYPE,STR,NULL,NULL,NULL);}
-#line 1664 "y.tab.c"
+#line 1719 "y.tab.c"
     break;
 
-  case 29: /* Type: BOOL  */
-#line 179 "t_1.y"
+  case 30: /* Type: BOOL  */
+#line 219 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,TYPE,BOOL,NULL,NULL,NULL);}
-#line 1670 "y.tab.c"
+#line 1725 "y.tab.c"
     break;
 
-  case 30: /* MainBlock: INT MAIN '(' ')' '{' LDeclBlock LBody '}'  */
-#line 182 "t_1.y"
+  case 31: /* MainBlock: INT MAIN '(' ')' '{' LDeclBlock LBody '}'  */
+#line 222 "t_1.y"
                                                                     {
-                                                                      yyval = (YYSTYPE) createTree(0,-1,MAIN,MAIN,"main",NULL,NULL) ;
-                                                                      yyval->type = yyvsp[-7]->type ;
+                                                                      yyval = (YYSTYPE) createTree(-1,-1,ID,ID,"main",NULL,NULL) ;
+                                                                      yyval->type = INT ;
                                                                       yyval->nodeType = FUNCTION ;
-                                                                      yyval->sTable = makeLocalTable(yyval,yyvsp[-1]) ;
-                                                                      yyval->left = yyvsp[-4] ;
-                                                                      yyval->right = yyvsp[0] ;
+                                                                      yyval->sTable = makeLocalTable(yyval,yyvsp[-2]) ;
+                                                                      yyval->right = yyvsp[-1] ;
+                                                                      assignTable(yyval,yyval->sTable) ;
+                                                                      setLTable(yyval->varName,yyval->sTable) ;
+
+                                                                      // printf("------%15s  -----\n",$$->varName) ;
+                                                                      // showLTable($$->sTable) ;
+                                                                      // printf("----------------------------\n") ;
                                                                     }
-#line 1683 "y.tab.c"
+#line 1743 "y.tab.c"
     break;
 
-  case 31: /* IfStmt: IF '(' E ')' THEN Slist ELSE Slist ENDIF ';'  */
-#line 192 "t_1.y"
+  case 32: /* MainBlock: INT MAIN '(' ')' '{' LBody '}'  */
+#line 235 "t_1.y"
+                                                         {
+                                                                      yyval = (YYSTYPE) createTree(-1,-1,ID,ID,"main",NULL,NULL) ;
+                                                                      yyval->type = INT ;
+                                                                      yyval->nodeType = FUNCTION ;
+                                                                      yyval->sTable = calloc(1,sizeof(LSymbol)) ;
+                                                                      yyval->sTable->name = "NULL" ;
+                                                                      yyval->right = yyvsp[-1] ;
+                                                                      assignTable(yyval,yyval->sTable) ;
+                                                                      setLTable(yyval->varName,yyval->sTable) ;
+
+                                                                      // printf("------%15s  -----\n",$$->varName) ;
+                                                                      // showLTable($$->sTable) ;
+                                                                      // printf("----------------------------\n") ;
+                                                                    }
+#line 1762 "y.tab.c"
+    break;
+
+  case 33: /* IfStmt: IF '(' E ')' THEN Slist ELSE Slist ENDIF ';'  */
+#line 251 "t_1.y"
                                                         {
                                                           YYSTYPE Temp = (YYSTYPE) createTree(0,-1,IFTHEN,IFTHEN,NULL,yyvsp[-4],yyvsp[-2]);
                                                           yyval = (YYSTYPE) createTree(0,-1,IFTHEN,IF,NULL,yyvsp[-7],Temp) ;
                                                         }
-#line 1692 "y.tab.c"
+#line 1771 "y.tab.c"
     break;
 
-  case 32: /* IfStmt: IF '(' E ')' THEN Slist ENDIF ';'  */
-#line 196 "t_1.y"
+  case 34: /* IfStmt: IF '(' E ')' THEN Slist ENDIF ';'  */
+#line 255 "t_1.y"
                                                         {yyval = (YYSTYPE) createTree(0,-1,IF,IF,NULL,yyvsp[-5],yyvsp[-2]);}
-#line 1698 "y.tab.c"
+#line 1777 "y.tab.c"
     break;
 
-  case 33: /* WhStmt: WHILE '(' E ')' DO Slist ENDWHILE ';'  */
-#line 199 "t_1.y"
+  case 35: /* WhStmt: WHILE '(' E ')' DO Slist ENDWHILE ';'  */
+#line 258 "t_1.y"
                                                   {
                                                     // printf("%d\n",$6->nodeType) ;
                                                     yyval = (YYSTYPE) createTree(0,-1,WHILE,WHILE,NULL,yyvsp[-5],yyvsp[-2]);}
-#line 1706 "y.tab.c"
+#line 1785 "y.tab.c"
     break;
 
-  case 35: /* LBody: BEGIN_ END_  */
-#line 205 "t_1.y"
+  case 36: /* LBody: BEGIN_ Slist END_  */
+#line 263 "t_1.y"
+                                    {yyval = yyvsp[-1];}
+#line 1791 "y.tab.c"
+    break;
+
+  case 37: /* LBody: BEGIN_ END_  */
+#line 264 "t_1.y"
                                     {printf("Empty Body") ;}
-#line 1712 "y.tab.c"
+#line 1797 "y.tab.c"
     break;
 
-  case 36: /* Slist: Slist Stmt  */
-#line 208 "t_1.y"
+  case 38: /* Slist: Slist Stmt  */
+#line 267 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,-1,Connector,Connector,NULL,yyvsp[-1],yyvsp[0]);}
-#line 1718 "y.tab.c"
+#line 1803 "y.tab.c"
     break;
 
-  case 37: /* Slist: Stmt  */
-#line 209 "t_1.y"
+  case 39: /* Slist: Stmt  */
+#line 268 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1724 "y.tab.c"
+#line 1809 "y.tab.c"
     break;
 
-  case 38: /* Stmt: Input  */
-#line 212 "t_1.y"
+  case 40: /* Stmt: Input  */
+#line 271 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1730 "y.tab.c"
+#line 1815 "y.tab.c"
     break;
 
-  case 39: /* Stmt: Output  */
-#line 213 "t_1.y"
+  case 41: /* Stmt: Output  */
+#line 272 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1736 "y.tab.c"
+#line 1821 "y.tab.c"
     break;
 
-  case 40: /* Stmt: Asgmt  */
-#line 214 "t_1.y"
+  case 42: /* Stmt: Asgmt  */
+#line 273 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1742 "y.tab.c"
+#line 1827 "y.tab.c"
     break;
 
-  case 41: /* Stmt: IfStmt  */
-#line 215 "t_1.y"
+  case 43: /* Stmt: IfStmt  */
+#line 274 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1748 "y.tab.c"
+#line 1833 "y.tab.c"
     break;
 
-  case 42: /* Stmt: WhStmt  */
-#line 216 "t_1.y"
+  case 44: /* Stmt: WhStmt  */
+#line 275 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1754 "y.tab.c"
+#line 1839 "y.tab.c"
     break;
 
-  case 43: /* Stmt: BrkStmt  */
-#line 217 "t_1.y"
+  case 45: /* Stmt: BrkStmt  */
+#line 276 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1760 "y.tab.c"
+#line 1845 "y.tab.c"
     break;
 
-  case 44: /* Stmt: RetStmt  */
-#line 218 "t_1.y"
+  case 46: /* Stmt: RetStmt  */
+#line 277 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1766 "y.tab.c"
+#line 1851 "y.tab.c"
     break;
 
-  case 45: /* Varlist: Varlist ',' ID  */
-#line 221 "t_1.y"
+  case 47: /* Varlist: Varlist ',' ID  */
+#line 280 "t_1.y"
                                   {
                                     yyvsp[0]->nodeType = IDDECL ;
                                     yyval = (YYSTYPE) createTree(0,-1,IDLIST,IDLIST,NULL,yyvsp[-2],yyvsp[0]);
                                   }
-#line 1775 "y.tab.c"
+#line 1860 "y.tab.c"
     break;
 
-  case 46: /* Varlist: Varlist ',' ID '[' NUM ']'  */
-#line 225 "t_1.y"
+  case 48: /* Varlist: Varlist ',' ID '[' NUM ']'  */
+#line 284 "t_1.y"
                                           {
                                             yyvsp[-3]->nodeType = IDDECL ;
                                             yyvsp[-3]->type = ARRAY ;
@@ -1783,85 +1868,85 @@ yyreduce:
                                             yyvsp[-3]->left = yyvsp[-1] ;
                                             yyval = (YYSTYPE) createTree(0,-1,IDLIST,IDLIST,NULL,yyvsp[-5],yyvsp[-3]);
                                           }
-#line 1787 "y.tab.c"
+#line 1872 "y.tab.c"
     break;
 
-  case 47: /* Varlist: ID  */
-#line 232 "t_1.y"
+  case 49: /* Varlist: ID  */
+#line 291 "t_1.y"
                                   {
                                     yyvsp[0]->nodeType = IDDECL ;
                                     yyval = yyvsp[0] ;
                                     // printf("VAR %s %d\n",$$->varName,$$->type);
                                   }
-#line 1797 "y.tab.c"
+#line 1882 "y.tab.c"
     break;
 
-  case 48: /* Varlist: ID '[' NUM ']'  */
-#line 237 "t_1.y"
+  case 50: /* Varlist: ID '[' NUM ']'  */
+#line 296 "t_1.y"
                                   {
                                     yyvsp[-3]->nodeType = IDDECL ;
                                     yyvsp[-3]->type = ARRAY ;
                                     // $1->left = (YYSTYPE) createTree(0,-1,EXPR,EXPR,NULL,$3,NULL) ;
                                     yyvsp[-3]->left = yyvsp[-1] ;
                                   }
-#line 1808 "y.tab.c"
+#line 1893 "y.tab.c"
     break;
 
-  case 49: /* RetStmt: RETURN E ';'  */
-#line 245 "t_1.y"
-                                  {printf("RetStmt\n") ;}
-#line 1814 "y.tab.c"
+  case 51: /* RetStmt: RETURN E ';'  */
+#line 304 "t_1.y"
+                                  {yyval = (YYSTYPE) createTree(0,-1,RETURN,RETURN,NULL,yyvsp[-1],NULL) ;}
+#line 1899 "y.tab.c"
     break;
 
-  case 50: /* BrkStmt: BRKP ';'  */
-#line 248 "t_1.y"
+  case 52: /* BrkStmt: BRKP ';'  */
+#line 307 "t_1.y"
                                   {yyval = (YYSTYPE) createTree(0,-1,BRKP,BRKP,NULL,NULL,NULL);}
-#line 1820 "y.tab.c"
+#line 1905 "y.tab.c"
     break;
 
-  case 51: /* Input: READ '(' ID ')' ';'  */
-#line 251 "t_1.y"
+  case 53: /* Input: READ '(' ID ')' ';'  */
+#line 310 "t_1.y"
                                   {
                                     yyval = (YYSTYPE) createTree(0,-1,READ,INT,NULL,yyvsp[-2],NULL); 
-                                    printf("[%#x %d] ",yyval,yyvsp[-2]->nodeType);
+                                    // printf("[%#x %d] ",$$,$3->nodeType);
                                   }
-#line 1829 "y.tab.c"
+#line 1914 "y.tab.c"
     break;
 
-  case 52: /* Input: READ '(' ArrEl ')' ';'  */
-#line 255 "t_1.y"
+  case 54: /* Input: READ '(' ArrEl ')' ';'  */
+#line 314 "t_1.y"
                                   {
                                     yyval = (YYSTYPE) createTree(0,-1,READ,INT,NULL,yyvsp[-2],NULL); 
-                                    printf("[%#x %d] ",yyval,yyvsp[-2]->nodeType);
+                                    // printf("[%#x %d] ",$$,$3->nodeType);
                                   }
-#line 1838 "y.tab.c"
+#line 1923 "y.tab.c"
     break;
 
-  case 53: /* Output: WRITE '(' E ')' ';'  */
-#line 261 "t_1.y"
+  case 55: /* Output: WRITE '(' E ')' ';'  */
+#line 320 "t_1.y"
                                   {
                                     yyval = (YYSTYPE) createTree(0,-1,WRITE,INT,NULL,yyvsp[-2],NULL); 
                                     // printf("[%#x %d] ",$$,$3->nodeType);
                                   }
-#line 1847 "y.tab.c"
+#line 1932 "y.tab.c"
     break;
 
-  case 54: /* Asgmt: ID EQ E ';'  */
-#line 267 "t_1.y"
+  case 56: /* Asgmt: ID EQ E ';'  */
+#line 326 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,'=',EQ,EQ,NULL,yyvsp[-3],yyvsp[-1]);}
-#line 1853 "y.tab.c"
+#line 1938 "y.tab.c"
     break;
 
-  case 55: /* Asgmt: ArrEl EQ E ';'  */
-#line 268 "t_1.y"
+  case 57: /* Asgmt: ArrEl EQ E ';'  */
+#line 327 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,'=',EQ,EQ,NULL,yyvsp[-3],yyvsp[-1]);}
-#line 1859 "y.tab.c"
+#line 1944 "y.tab.c"
     break;
 
-  case 56: /* E: E OP2 E  */
-#line 271 "t_1.y"
+  case 58: /* E: E OP2 E  */
+#line 330 "t_1.y"
                                     {
-                                      if((yyvsp[-2]->type==INT||yyvsp[-2]->type==ID)&& yyvsp[0]->type==INT||yyvsp[0]->type==ID)
+                                      if((yyvsp[-2]->type==INT||yyvsp[-2]->type==ID||yyvsp[-2]->type==CALL) && (yyvsp[0]->type==INT||yyvsp[0]->type==ID||yyvsp[0]->type==CALL))
                                       {
                                         yyval = yyvsp[-1];
                                         yyval->left = yyvsp[-2]; 
@@ -1873,13 +1958,13 @@ yyreduce:
                                         exit(0) ;
                                       }
                                     }
-#line 1877 "y.tab.c"
+#line 1962 "y.tab.c"
     break;
 
-  case 57: /* E: E OP E  */
-#line 284 "t_1.y"
+  case 59: /* E: E OP E  */
+#line 343 "t_1.y"
                                     {
-                                      if((yyvsp[-2]->type==INT||yyvsp[-2]->type==ID) && (yyvsp[0]->type==INT||yyvsp[0]->type==ID))
+                                      if((yyvsp[-2]->type==INT||yyvsp[-2]->type==ID||yyvsp[-2]->type==CALL) && (yyvsp[0]->type==INT||yyvsp[0]->type==ID||yyvsp[0]->type==CALL))
                                       {
                                         yyval = yyvsp[-1];
                                         yyval->left = yyvsp[-2]; 
@@ -1891,95 +1976,121 @@ yyreduce:
                                         exit(0) ;
                                       }
                                     }
-#line 1895 "y.tab.c"
+#line 1980 "y.tab.c"
     break;
 
-  case 58: /* E: E LT E  */
-#line 297 "t_1.y"
+  case 60: /* E: E LT E  */
+#line 356 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,LT,RELOP,BOOL,NULL,yyvsp[-2],yyvsp[0]);}
-#line 1901 "y.tab.c"
+#line 1986 "y.tab.c"
     break;
 
-  case 59: /* E: E GT E  */
-#line 298 "t_1.y"
+  case 61: /* E: E GT E  */
+#line 357 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,GT,RELOP,BOOL,NULL,yyvsp[-2],yyvsp[0]);}
-#line 1907 "y.tab.c"
+#line 1992 "y.tab.c"
     break;
 
-  case 60: /* E: E EE E  */
-#line 299 "t_1.y"
+  case 62: /* E: E EE E  */
+#line 358 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,EE,RELOP,BOOL,"==",yyvsp[-2],yyvsp[0]);}
-#line 1913 "y.tab.c"
+#line 1998 "y.tab.c"
     break;
 
-  case 61: /* E: E NE E  */
-#line 300 "t_1.y"
+  case 63: /* E: E NE E  */
+#line 359 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,NE,RELOP,BOOL,"!=",yyvsp[-2],yyvsp[0]);}
-#line 1919 "y.tab.c"
+#line 2004 "y.tab.c"
     break;
 
-  case 62: /* E: E LTE E  */
-#line 301 "t_1.y"
+  case 64: /* E: E LTE E  */
+#line 360 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,LTE,RELOP,BOOL,"<=",yyvsp[-2],yyvsp[0]);}
-#line 1925 "y.tab.c"
+#line 2010 "y.tab.c"
     break;
 
-  case 63: /* E: E GTE E  */
-#line 302 "t_1.y"
+  case 65: /* E: E GTE E  */
+#line 361 "t_1.y"
                                     {yyval = (YYSTYPE) createTree(0,GTE,RELOP,BOOL,">=",yyvsp[-2],yyvsp[0]);}
-#line 1931 "y.tab.c"
+#line 2016 "y.tab.c"
     break;
 
-  case 64: /* E: E OR E  */
-#line 303 "t_1.y"
-                                    {yyval = (YYSTYPE) createTree(0,OR,RELOP,BOOL,"||",yyvsp[-2],yyvsp[0]);}
-#line 1937 "y.tab.c"
+  case 66: /* E: E OR E  */
+#line 362 "t_1.y"
+                                    {yyval = (YYSTYPE) createTree(0,OR,OR,BOOL,"||",yyvsp[-2],yyvsp[0]);}
+#line 2022 "y.tab.c"
     break;
 
-  case 65: /* E: E AND E  */
-#line 304 "t_1.y"
-                                    {yyval = (YYSTYPE) createTree(0,AND,RELOP,BOOL,"&&",yyvsp[-2],yyvsp[0]);}
-#line 1943 "y.tab.c"
+  case 67: /* E: E AND E  */
+#line 363 "t_1.y"
+                                    {yyval = (YYSTYPE) createTree(0,AND,AND,BOOL,"&&",yyvsp[-2],yyvsp[0]);}
+#line 2028 "y.tab.c"
     break;
 
-  case 66: /* E: ID  */
-#line 305 "t_1.y"
+  case 68: /* E: ID  */
+#line 364 "t_1.y"
                                     {yyval = yyvsp[0];}
-#line 1949 "y.tab.c"
+#line 2034 "y.tab.c"
     break;
 
-  case 67: /* E: ID '(' ')'  */
-#line 306 "t_1.y"
-                                    {}
-#line 1955 "y.tab.c"
+  case 69: /* E: ID '(' ')'  */
+#line 365 "t_1.y"
+                                    {yyval = (YYSTYPE) createTree(0,-1,FUNCTION,CALL,NULL,NULL,yyvsp[-2]) ;}
+#line 2040 "y.tab.c"
     break;
 
-  case 68: /* E: ID '(' ArgList ')'  */
-#line 307 "t_1.y"
-                                    {}
-#line 1961 "y.tab.c"
+  case 70: /* E: ID '(' ArgList ')'  */
+#line 366 "t_1.y"
+                                    {yyval = (YYSTYPE) createTree(0,-1,FUNCTION,CALL,NULL,yyvsp[-1],yyvsp[-3]) ;}
+#line 2046 "y.tab.c"
     break;
 
-  case 69: /* E: NUM  */
-#line 308 "t_1.y"
+  case 71: /* E: NUM  */
+#line 367 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1967 "y.tab.c"
+#line 2052 "y.tab.c"
     break;
 
-  case 70: /* E: STRING  */
-#line 309 "t_1.y"
+  case 72: /* E: STRING  */
+#line 368 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1973 "y.tab.c"
+#line 2058 "y.tab.c"
     break;
 
-  case 71: /* E: ArrEl  */
-#line 310 "t_1.y"
+  case 73: /* E: ArrEl  */
+#line 369 "t_1.y"
                                     {yyval = yyvsp[0]; }
-#line 1979 "y.tab.c"
+#line 2064 "y.tab.c"
     break;
 
-  case 74: /* ArrEl: ID '[' E ']'  */
-#line 315 "t_1.y"
+  case 74: /* E: '(' E ')'  */
+#line 370 "t_1.y"
+                                    {yyval = yyvsp[-1]; }
+#line 2070 "y.tab.c"
+    break;
+
+  case 75: /* ArgList: ArgList ',' E  */
+#line 372 "t_1.y"
+                                    {
+                                      yyvsp[0]->type = ARGLIST ;
+                                      yyval = (YYSTYPE) createTree(0,-1,ARGLIST,ARGLIST,NULL,yyvsp[-2],yyvsp[0]) ;
+                                      yyval->val = yyvsp[-2]->val + 1 ;
+                                    }
+#line 2080 "y.tab.c"
+    break;
+
+  case 76: /* ArgList: E  */
+#line 377 "t_1.y"
+                                    {
+                                      yyvsp[0]->val = 0 ;
+                                      yyval = (YYSTYPE) createTree(0,-1,ARGLIST,ARGLIST,NULL,yyvsp[0],NULL) ;
+                                      yyval->val = yyvsp[0]->val + 1 ;
+                                    }
+#line 2090 "y.tab.c"
+    break;
+
+  case 77: /* ArrEl: ID '[' E ']'  */
+#line 383 "t_1.y"
                                     {
                                       yyval = yyvsp[-3]; 
                                       yyval->nodeType = ARRAY ;
@@ -1987,11 +2098,11 @@ yyreduce:
                                       // $$->left = (YYSTYPE) createTree(0,-1,EXPR,EXPR,NULL,$3,NULL) ;
                                       yyval->left = yyvsp[-1] ;
                                     }
-#line 1991 "y.tab.c"
+#line 2102 "y.tab.c"
     break;
 
 
-#line 1995 "y.tab.c"
+#line 2106 "y.tab.c"
 
       default: break;
     }
@@ -2185,7 +2296,7 @@ yyreturn:
   return yyresult;
 }
 
-#line 326 "t_1.y"
+#line 394 "t_1.y"
 
 
 void yyerror(char const *s)
@@ -2199,7 +2310,7 @@ void paren(tnode *Tree)
   printf("(") ;
   if(Tree != NULL) 
   {
-    printf("[%d %c] ",Tree->nodeType,Tree->op) ;
+    printf("[%d %c %s] ",Tree->nodeType,Tree->op,Tree->varName) ;
     paren(Tree->left) ;
     paren(Tree->right) ;
   }
@@ -2209,7 +2320,7 @@ void paren(tnode *Tree)
 
 int getReg()
 {
-  for(int i=0;i<20;i+=1)
+  for(int i=1;i<19;i+=1)
     if(REG[i] == 0)
     {
       REG[i] = 1 ;
@@ -2235,10 +2346,23 @@ int getAddress(tnode *Node)
 {
   for(int i=0;i<varEntry;i+=1)
     if(!strcmp(sTable[i].name,Node->varName))
-      // if(Node->nodeType==ARRAY) 
-      //   return sTable[i].address + Node->left->val ;
-      // else 
         return sTable[i].address ;
+  return -1 ;
+}
+
+int getLabel(tnode *Node)
+{
+  for(int i=0;i<varEntry;i+=1)
+    if(!strcmp(sTable[i].name,Node->varName))
+        return sTable[i].flabel ;
+  return -1 ;
+}
+
+ParamStruct *getParams(tnode *Node)
+{
+  for(int i=0;i<varEntry;i+=1)
+    if(!strcmp(sTable[i].name,Node->varName))
+        return sTable[i].paramList ;
   return -1 ;
 }
 
@@ -2246,12 +2370,21 @@ int getLAddress(tnode *Node)
 {
   if(Node==NULL)
     return -1 ;
+  // printf("-----------\n") ;
+  // showLTable(Node->sTable) ;
+  // printf("-----------\n") ;
   LSymbol *sTable = Node->sTable ;
   while(sTable != NULL)
+  {
+    // printf("Search %10s %10s\n",sTable->name , Node->varName) ;
     if(!strcmp(sTable->name,Node->varName))
+    {
+      // printf("%s Returning %d\n",sTable->name,sTable->address); 
       return sTable->address ;
+    }
     else 
       sTable = sTable->next ;
+  }
   return -1 ;
 }
 
@@ -2262,8 +2395,7 @@ void addLSymbol(LSymbol **table,tnode *Node)
   {
     *table = calloc(1,sizeof(LSymbol)) ;
     temp = *table ;
-    temp->name = Node->varName ;/*calloc(25,sizeof(char)) ;
-    strcpy(temp->name,Node->varName) ;*/
+    temp->name = Node->varName ;
     temp->type = Node->type ;
     temp->type = Node->type ;
     temp->address = lSize ;
@@ -2277,11 +2409,11 @@ void addLSymbol(LSymbol **table,tnode *Node)
       temp = temp->next ;
     temp->next = calloc(1,sizeof(LSymbol)) ;
     temp = temp->next ;
-    temp->name = Node->varName ;/*calloc(25,sizeof(char)) ;
-    strcpy(temp->name,Node->varName) ;*/
+    temp->name = Node->varName ;
     temp->type = Node->type ;
     temp->address = lSize ;
     temp->size = Node->left ? Node->left->val : 1 ;
+    temp->next = NULL ;
   }
   lSize += temp->size ;
   lEntry += 1 ;
@@ -2300,9 +2432,31 @@ void addLSymbols(LSymbol **table,tnode *Node)
   }
 }
 
+void addParams(LSymbol *table,ParamStruct *param)
+{
+  int s = -3 ;
+  while(table->next!=NULL)
+  {
+    // s += table->size ;
+    table = table->next ;
+  }
+  while(param!=NULL)
+  {
+    table->next = calloc(1,sizeof(LSymbol)) ;
+    table = table->next ;
+    table->name = param->name ;
+    table->type = param->type ;
+    table->address = s ;
+    table->size = 1 ;
+    table->next = NULL ;
+    param = param->next ;
+    s -= table->size ;
+  }
+}
+
 void assignTable(tnode *Tree,LSymbol *table)
 {
-  if(Tree == NULL||Tree->nodeType == PARAM)
+  if(Tree == NULL)
     return ;
   Tree->sTable = table ;
   assignTable(Tree->left,table) ;
@@ -2313,9 +2467,16 @@ void showLTable(LSymbol *table)
 {
   while(table!=NULL)
     {
-      printf("%10s %4d %4d %4d %#x\n",table->name,table->type,table->address,table->size,table->next) ;
+      printf("%10s %4d %4d %4d %#x\n",table->name,table->type,table->address,table->size,table) ;
       table = table->next ;
     }
+}
+
+void setLTable(char *name,LSymbol *table) 
+{
+  for(int i=0;i<varEntry;i+=1)
+    if(!strcmp(sTable[i].name,name))
+      sTable[i].sTable = table ;
 }
 
 LSymbol *makeLocalTable(tnode *Node,tnode *decl)
@@ -2324,12 +2485,12 @@ LSymbol *makeLocalTable(tnode *Node,tnode *decl)
     Node->sTable = NULL ;
   else
     addLSymbols(&(Node->sTable),decl) ;
-  assignTable(decl,Node->sTable) ;
-  printf("------%15s  -----\n",Node->varName) ;
-  showLTable(Node->sTable) ;
-  printf("----------------------------\n") ;
+  // printf("------%15s  -----\n",Node->varName) ;
+  // showLTable(Node->sTable) ;
+  // printf("----------------------------\n") ;
   lEntry = 0 ;
-  lSize = 0;
+  lSize = 1;
+  return Node->sTable ;
 }
 
 ParamStruct *makeParamlist(tnode *Node,ParamStruct **paramList,int pars)
@@ -2358,14 +2519,10 @@ void addGSymbol(tnode *Node)
     printf("[+] Error : Duplicate Declaration\n") ;
     exit(0) ;
   }
-  // printf("Adding Variable %s %d\n",Node->varName,Node->left ? Node->left->val : 1) ;
   if(sTable == NULL)
     sTable = (GSymbol *) calloc(1,sizeof(GSymbol)) ;
   else 
     sTable = (GSymbol *) realloc(sTable,(varEntry+1)*sizeof(GSymbol)) ;
-  // int size = 1 ;
-  // if(Node->left!=NULL)
-  //   size = Node->left->val ;
   sTable[varEntry].name = Node->varName ;
   sTable[varEntry].type = Node->type ;
   if(Node->nodeType == FUNCTION)
@@ -2399,6 +2556,17 @@ void addGSymbols(tnode *Node)
   }
 }
 
+int getStackSize(LSymbol *table)
+{
+  int size = 0 ;
+  while(table!=NULL)
+  {
+    size += table->size ;
+    table = table->next ;
+  }
+  return size ;
+}
+
 void showParamList(ParamStruct *list)
 {
   while(list!=NULL)
@@ -2418,86 +2586,138 @@ void showGTable()
     }
 }
 
+void copyRegs(int *from,int *to) 
+{
+  return ; 
+}
+
+void showRegs()
+{
+  for(int i=0;i<20;i+=1)
+  {
+    printf("R%d : %d\t\t",i,REG[i]) ;
+    if(i%5==4)
+      printf("\n") ;
+  }
+  printf("\n") ;
+}
+
 int codeGen(tnode *Tree) 
 {
   int p,q,s,b ;
   int l1 , l2 ;
+  int *regStack = NULL ;
   if(Tree==NULL)
     return -1;
   switch(Tree->nodeType)
   {
-    case READ:  fprintf(target_file,"MOV R15,7\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"MOV R15,-2\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
+    case READ:  //printf("PRINT \n") ;
+                fprintf(target_file,"MOV R19,7\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
+                fprintf(target_file,"MOV R19,-2\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
                 if(Tree->left->nodeType == ARRAY)
                 {  
                   Tree->left->op = READ ;
-                  fprintf(target_file,"MOV R15,R%d\n",codeGen(Tree->left)) ;
+                  fprintf(target_file,"MOV R19,R%d\n",codeGen(Tree->left)) ;
                   p = codeGen(Tree->left) ;
-                  // fprintf(target_file,"ADD R15,R%d\n",p); 
                 }
                 else
-                  fprintf(target_file,"MOV R15,%d\n",getAddress(Tree->left)) ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
+                {
+                  addr = getLAddress(Tree->left) ;
+                  if(addr!=-1)
+                  {
+                    fprintf(target_file,"MOV R19,BP\n") ;
+                    fprintf(target_file,"ADD R19,%d\n",addr) ;
+                    // fprintf(target_file,"MOV R19,[R19]\n") ;
+                  }
+                  else 
+                    fprintf(target_file,"MOV R19,%d\n",getAddress(Tree->left)) ;
+                }
+                fprintf(target_file,"PUSH R19\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
                 fprintf(target_file,"INT 6\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
                 if(Tree->left->nodeType == ARRAY)
                   freeReg(p) ;
                 return -1 ;
                 break ;
-    case WRITE: fprintf(target_file,"MOV R15,5\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"MOV R15,-1\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
+    case WRITE: //printf("WRITE \n") ;
+                fprintf(target_file,"MOV R19,5\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
+                fprintf(target_file,"MOV R19,-1\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
                 p = codeGen(Tree->left) ;
-                fprintf(target_file,"MOV R15,R%d\n",p) ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
-                fprintf(target_file,"PUSH R15\n") ;
+                fprintf(target_file,"MOV R19,R%d\n",p) ;
+                fprintf(target_file,"PUSH R19\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
+                fprintf(target_file,"PUSH R19\n") ;
                 fprintf(target_file,"INT 7\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
-                fprintf(target_file,"POP R15\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
+                fprintf(target_file,"POP R19\n") ;
                 freeReg(p) ;
                 return -1 ;
                 break ;
-    case NUM :  p = getReg() ;
-                fprintf(target_file,"MOV R%d, %d\n",p,Tree->val) ;
+    case NUM :  //printf("NUM \n") ;
+                p = getReg() ;
+                fprintf(target_file,"MOV R%d,%d\n",p,Tree->val) ;
                 return p ;
                 break ;
-    case STRING:p = getReg() ;
-                fprintf(target_file,"MOV R%d, %s\n",p,Tree->varName) ;
+    case STRING://printf("STR \n") ;
+                p = getReg() ;
+                fprintf(target_file,"MOV R%d,%s\n",p,Tree->varName) ;
                 return p ;
                 break ;
-    case ID :   p = getReg() ;
-                fprintf(target_file,"MOV R%d, [%d]\n",p,getAddress(Tree)) ;
+    case ID :   //printf("ID \n") ;
+                p = getReg() ;
+                addr = getLAddress(Tree) ;
+                if(addr!=-1)
+                { 
+                  fprintf(target_file,"MOV R%d,BP\n",p) ;
+                  fprintf(target_file,"ADD R%d,%d\n",p,addr) ;
+                  fprintf(target_file,"MOV R%d,[R%d]\n",p,p) ;
+                }
+                else 
+                  fprintf(target_file,"MOV R%d,[%d]\n",p,getAddress(Tree)) ;
                 return p ;
                 break ;
-    case ARRAY: p = getReg() ;
+    case ARRAY: //printf("ARRAY \n") ;
+                p = getReg() ;
                 q = codeGen(Tree->left) ;
-                fprintf(target_file,"MOV R%d, %d\n",p,getAddress(Tree)) ;
+                addr = getLAddress(Tree) ;
+                if(addr!=-1)
+                { 
+                  fprintf(target_file,"MOV R%d,BP\n",p) ;
+                  fprintf(target_file,"ADD R%d,%d\n",p,addr) ;
+                }
+                else 
+                  fprintf(target_file,"MOV R%d,%d\n",p,getAddress(Tree)) ;
                 fprintf(target_file,"ADD R%d, R%d\n",p,q) ;
                 if(Tree->op != READ && Tree->op != EQ) 
-                  fprintf(target_file,"MOV R%d, [R%d]\n",p,p) ;
+                  fprintf(target_file,"MOV R%d,[R%d]\n",p,p) ;
                 freeReg(q) ;
                 return p ;
                 break ;
     case OP2 :
-    case OP :   p = codeGen(Tree->left) ;
+    case OP :   //printf("OP \n") ;
+                //showRegs() ;
+                p = codeGen(Tree->left) ;
+                //showRegs() ;
                 q = codeGen(Tree->right) ;
+                //showRegs() ;
                 s = p ; 
                 b = q ;
+                //printf("Operation %d %c %d\n\n\n",s,Tree->op,b) ;
                 // s = p ; b = q ;
-                printf("[OP [%d %d] %d %d %c] \n",s,b,Tree->left->val,Tree->right->val,Tree->op) ;
+                //printf("[OP [%d %d] %d %d %c] \n",s,b,Tree->left->val,Tree->right->val,Tree->op) ;
                 switch(Tree->op)
                 {
                   case '+' :fprintf(target_file,"ADD R%d, R%d\n",s,b) ;
@@ -2515,7 +2735,40 @@ int codeGen(tnode *Tree)
                 freeReg(b) ;
                 return s ;
                 break ;
-    case RELOP :p = codeGen(Tree->left) ;
+    case AND    : //printf("AND \n") ;
+                  s = getReg() ;
+                  l1 = label++ ;
+                  l2 = label++ ;
+                  p = codeGen(Tree->left) ;
+                  fprintf(target_file,"JZ R%d,_L%d\n",p,l1) ;
+                  freeReg(p) ;
+                  q = codeGen(Tree->right) ;
+                  fprintf(target_file,"MOV R%d,R%d\n",s,q) ;
+                  freeReg(q) ;
+                  fprintf(target_file,"JMP _L%d\n",l2) ;
+                  fprintf(target_file,"_L%d:\n",l1) ;
+                  fprintf(target_file,"MOV R%d,0\n",s) ;
+                  fprintf(target_file,"_L%d:\n",l2) ;
+                  return s ;
+                  break ;
+    case OR     : //printf("OR \n") ;
+                  s = getReg() ;
+                  l1 = label++ ;
+                  l2 = label++ ;
+                  p = codeGen(Tree->left) ;
+                  fprintf(target_file,"JNZ R%d,_L%d\n",p,l1) ;
+                  freeReg(p) ;
+                  q = codeGen(Tree->right) ;
+                  fprintf(target_file,"MOV R%d,R%d\n",s,q) ;
+                  freeReg(q) ;
+                  fprintf(target_file,"JMP _L%d\n",l2) ;
+                  fprintf(target_file,"_L%d:\n",l1) ;
+                  fprintf(target_file,"MOV R%d,1\n",s) ;
+                  fprintf(target_file,"_L%d:\n",l2) ;
+                  return s ;
+                  break ;
+    case RELOP ://printf("RELOP \n") ;
+                p = codeGen(Tree->left) ;
                 q = codeGen(Tree->right) ;
                 switch(Tree->op)
                 {
@@ -2541,7 +2794,8 @@ int codeGen(tnode *Tree)
                 }
                 freeReg(q) ;
                 break ;
-    case WHILE :l1 = label++ ;
+    case WHILE ://printf("WHILE \n") ;
+                l1 = label++ ;
                 l2 = label++ ;
                 fprintf(target_file,"_L%d:\n",l1) ;
                 p = codeGen(Tree->left) ;
@@ -2549,9 +2803,10 @@ int codeGen(tnode *Tree)
                 q = codeGen(Tree->right) ;
                 fprintf(target_file,"JMP _L%d\n",l1) ;
                 fprintf(target_file,"_L%d:\n",l2) ;
-                  freeReg(p) ;
+                freeReg(p) ;
                 break ;
-    case IF   :   l1 = label++ ;
+    case IF   :   //printf("IF \n") ;
+                  l1 = label++ ;
                   // l2 = label++ ;
                   // l3 = label++ ;
                   p = codeGen(Tree->left) ;
@@ -2560,9 +2815,9 @@ int codeGen(tnode *Tree)
                   fprintf(target_file,"_L%d:\n",l1) ;
                   freeReg(p) ;
                   break ;
-    case IFTHEN : l1 = label++ ;
+    case IFTHEN : //printf("IFTHEN \n") ;
+                  l1 = label++ ;
                   l2 = label++ ;
-                  // l3 = label++ ;
                   p = codeGen(Tree->left) ;
                   fprintf(target_file,"JZ R%d,_L%d\n",p,l1) ;
                   q = codeGen(Tree->right->left) ;
@@ -2572,15 +2827,29 @@ int codeGen(tnode *Tree)
                   fprintf(target_file,"_L%d:\n",l2) ;
                   freeReg(p) ;
                   break ;
-    case EQ :   q = codeGen(Tree->right) ;
-                printf("[%c %d] \n",Tree->right->op,q) ;
+    case EQ :   //printf("EQ \n") ;
+                q = codeGen(Tree->right) ;
+                //printf("[%c %d] \n",Tree->right->op,q) ;
+                addr = getLAddress(Tree->left) ;
                 if(Tree->left->nodeType != ARRAY) 
-                  fprintf(target_file,"MOV [%d],R%d\n",getAddress(Tree->left),q)  ;
+                {
+                  if(addr != -1)
+                  { 
+                    p = getReg() ;
+                    fprintf(target_file,"MOV R%d,BP\n",p) ;
+                    fprintf(target_file,"ADD R%d,%d\n",p,addr) ;
+                    fprintf(target_file,"MOV [R%d],R%d\n",p,q) ;
+                    freeReg(p) ;
+                  }
+                  else 
+                    fprintf(target_file,"MOV [%d],R%d\n",getAddress(Tree->left),q)  ;
+                }
                 else
                 {
                   Tree->left->op = EQ ;
                   p = codeGen(Tree->left) ;
                   fprintf(target_file,"MOV [R%d], R%d\n",p,q) ;
+                  freeReg(p) ;
                 }
                 freeReg(q) ;
                 return -1 ;
@@ -2590,6 +2859,103 @@ int codeGen(tnode *Tree)
                     q = codeGen(Tree->right) ; 
                     return -1 ; 
                     break ;
+    case ARGLIST  : //printf("ARGLIST\n") ;
+                    // break ;
+                    if(Tree->left) 
+                    {
+                      q = codeGen(Tree->left) ;
+                      //printf("codeGen %d\n",q) ;
+                      if(q==-1) ;
+                        // fprintf(target_file,"PUSH R19\n") ;
+                      else 
+                      {
+                        fprintf(target_file,"PUSH R%d\n",q) ;
+                        freeReg(q) ;
+                      }
+                      /*
+                      p = codeGen(Tree->left) ;
+                      fprintf(target_file,"PUSH R%d\n",p) ;
+                      freeReg(p) ;*/
+                    }
+                    if(Tree->right)
+                    {
+                      q = codeGen(Tree->right) ;
+                      //printf("codeGen %d\n",q) ;
+                      if(q==-1) ;
+                        // fprintf(target_file,"PUSH R19\n") ;
+                      else 
+                      {
+                        fprintf(target_file,"PUSH R%d\n",q) ;
+                        freeReg(q) ;
+                      }
+                    }
+                    break ;
+    case FUNCTION : if(Tree->type==CALL)
+                    {
+                      printf("Function Call\n") ;
+                      regStack = (int *) calloc(20,sizeof(int)) ;
+                      // Save Regs
+                      for(int i=0;i<20;i+=1)
+                      {
+                        regStack[i] = REG[i] ;
+                        if(REG[i] == 1)
+                          fprintf(target_file,"PUSH R%d\n",i) ;
+                      }
+                      // Evaluate Arguments
+                      p = codeGen(Tree->left) ;
+                      for(int i=0;i<20;i+=1)
+                        REG[i] = 0 ;
+                      // Push Return Variable
+                      fprintf(target_file,"PUSH R0\n") ;
+                      // Function Call 
+                      fprintf(target_file,"CALL _F%d\n",getLabel(Tree->right)) ;
+                      // Pop Out Arguments 
+                      p = 0 ;
+                      while(regStack[p]!=0)
+                        p += 1; 
+                      fprintf(target_file,"POP R%d\n",p) ;
+                      if(Tree->left)
+                        for(int i=0 ;i<Tree->left->val ;i+=1)
+                          fprintf(target_file,"POP R19\n") ;
+                      for(int i=19;i>=0;i-=1)
+                      {
+                        REG[i] = regStack[i] ;
+                        if(regStack[i] == 1)
+                          fprintf(target_file,"POP R%d\n",i) ;
+                      }
+                      REG[p] = 1 ;
+                      free(regStack) ;
+                      return p ;
+                    }
+                    else 
+                    {
+                      q = getLabel(Tree) ;
+                      if(q==-1)
+                      {
+                        //printf("FunBlock _MAIN\n") ;
+                        fprintf(target_file,"_MAIN:\n") ;
+                      }
+                      else 
+                      {
+                        //printf("FunBlock _F%d\n",q) ;
+                        fprintf(target_file,"_F%d:\n",q) ;
+                      }
+                        fprintf(target_file,"PUSH BP\n") ;
+                        fprintf(target_file,"MOV BP,SP\n") ;
+                        fprintf(target_file,"ADD SP,%d\n",getStackSize(Tree->sTable)) ;
+                      p = codeGen(Tree->right) ;
+                    }
+                    break ;
+    case RETURN : p = codeGen(Tree->left) ;
+                  q = getReg() ;
+                  fprintf(target_file,"MOV R%d,BP\n",q) ;
+                  fprintf(target_file,"SUB R%d,2\n",q) ;
+                  fprintf(target_file,"MOV [R%d],R%d\n",q,p) ;
+                  fprintf(target_file,"SUB SP,%d\n",getStackSize(Tree->sTable)) ;
+                  fprintf(target_file,"POP BP\n");
+                  fprintf(target_file,"RET\n") ;
+                  return p ;
+                  break ;
     default :   break ;
   }
   return -1 ;
